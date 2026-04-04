@@ -55,13 +55,21 @@ export default function Appointments() {
     const cancelledIds = appointments.filter(a => a.status === 'cancelled').map(a => a.id)
     if (cancelledIds.length === 0) return
     setClearing(true)
-    await supabase
-      .from('appointments')
-      .delete()
-      .in('id', cancelledIds)
-    // Always reload from DB to show true state (RLS may affect delete silently)
-    await loadAppointments()
-    setClearing(false)
+    try {
+      const { error } = await supabase
+        .from('appointments')
+        .delete()
+        .in('id', cancelledIds)
+      if (error) {
+        console.error('Delete error:', error.message)
+      }
+    } catch (e) {
+      console.error('Delete exception:', e)
+    } finally {
+      // Always reload from DB regardless of delete success/failure
+      await loadAppointments()
+      setClearing(false)
+    }
   }
 
   const sorted = [...appointments].sort((a, b) => {

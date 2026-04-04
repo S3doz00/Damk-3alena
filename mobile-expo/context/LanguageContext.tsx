@@ -88,6 +88,23 @@ const translations: Record<string, Record<Lang, string>> = {
   tabMap:           { en: 'Map',             ar: 'الخريطة' },
   tabUrgent:        { en: 'Urgent',          ar: 'عاجل' },
   tabProfile:       { en: 'Profile',         ar: 'الملف' },
+
+  // Onboarding
+  onboardStep1Title:   { en: 'Your Information',    ar: 'معلوماتك' },
+  onboardStep1Desc:    { en: 'Help us match you with nearby blood needs', ar: 'ساعدنا في مطابقتك مع احتياجات الدم القريبة منك' },
+  onboardStep2Title:   { en: 'Blood Type',          ar: 'فصيلة الدم' },
+  onboardStep2Desc:    { en: 'This helps us alert you when your blood type is urgently needed', ar: 'يساعدنا هذا في تنبيهك عندما تكون فصيلة دمك مطلوبة بإلحاح' },
+  onboardStep3Title:   { en: 'Your City',           ar: 'مدينتك' },
+  onboardStep3Desc:    { en: "We'll show you the nearest hospitals and urgent requests", ar: 'سنعرض لك أقرب المستشفيات والطلبات العاجلة' },
+  fullName:            { en: 'Full Name',            ar: 'الاسم الكامل' },
+  fullNamePlaceholder: { en: 'Ahmad Al-Rashid',      ar: 'أحمد الراشد' },
+  phoneNumber:         { en: 'Phone Number',         ar: 'رقم الهاتف' },
+  dateOfBirth:         { en: 'Date of Birth (optional)', ar: 'تاريخ الميلاد (اختياري)' },
+  weightOptional:      { en: 'Weight in kg (optional)', ar: 'الوزن بالكيلوغرام (اختياري)' },
+  weightPlaceholder:   { en: 'e.g. 72',              ar: 'مثال: 72' },
+  onboardBloodTypeNote:{ en: 'You can update this anytime in your profile settings', ar: 'يمكنك تحديث هذا في أي وقت من إعدادات ملفك الشخصي' },
+  onboardContinue:     { en: 'Continue',             ar: 'التالي' },
+  onboardFinish:       { en: 'Start Saving Lives',   ar: 'ابدأ إنقاذ الأرواح' },
 }
 
 const LanguageContext = createContext<LanguageContextValue>({

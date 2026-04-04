@@ -10,7 +10,7 @@ interface SystemParam {
 }
 
 export default function SystemSettings() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [params, setParams] = useState<SystemParam[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
@@ -280,28 +280,56 @@ export default function SystemSettings() {
 
   function formatParamLabel(key: string): string {
     const translated = t(key as any)
-    // If translation exists and is not the key itself, use it
     if (translated && translated !== key) return translated
-    // Fallback: format from key
     return key
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
   }
 
+  // Translated descriptions (overrides the DB English description when in AR)
+  const paramDescriptions: Record<string, { en: string; ar: string }> = {
+    shortage_threshold_critical: { en: 'Units below which a blood type is critically short', ar: 'الوحدات التي تعتبر دونها فصيلة الدم في نقص حرج' },
+    shortage_threshold_warning:  { en: 'Units below which a blood type triggers a warning',  ar: 'الوحدات التي تستدعي دونها تنبيه للفصيلة' },
+    shortage_threshold_units:    { en: 'Units below which a shortage alert is triggered',     ar: 'الوحدات التي تستدعي دونها تنبيه النقص' },
+    eligibility_days:            { en: 'Minimum days between donations',                      ar: 'الحد الأدنى للأيام بين التبرعات' },
+    eligibility_gap_days:        { en: 'Minimum days between donations',                      ar: 'الحد الأدنى للأيام بين التبرعات' },
+    donation_interval_days:      { en: 'Minimum days between donations',                      ar: 'الحد الأدنى للأيام بين التبرعات' },
+    notification_radius_km:      { en: 'Max distance in km for donor notifications',          ar: 'الحد الأقصى للمسافة بالكم لإشعار المتبرعين' },
+    forecast_horizon_weeks:      { en: 'Number of weeks to forecast ahead',                   ar: 'عدد الأسابيع للتوقع المسبق' },
+    max_appointments_per_day:    { en: 'Maximum bookings per day per facility',               ar: 'الحد الأقصى للحجوزات يوميًا لكل منشأة' },
+    appointment_slot_minutes:    { en: 'Duration of each appointment slot in minutes',        ar: 'مدة كل موعد بالدقائق' },
+    min_inventory_units:         { en: 'Minimum safe blood units to keep in stock',           ar: 'الحد الأدنى لوحدات الدم الآمنة في المخزون' },
+    recommendation_top_n:        { en: 'Number of donors to include in recommendations',     ar: 'عدد المتبرعين المقترحين في كل توصية' },
+    ai_confidence_threshold:     { en: 'Minimum AI confidence score to show predictions',    ar: 'الحد الأدنى لدرجة ثقة الذكاء الاصطناعي' },
+    max_age_years:               { en: 'Maximum donor age in years',                         ar: 'الحد الأقصى لعمر المتبرع بالسنوات' },
+    min_age_years:               { en: 'Minimum donor age in years',                         ar: 'الحد الأدنى لعمر المتبرع بالسنوات' },
+    min_weight_kg:               { en: 'Minimum donor weight in kg',                         ar: 'الحد الأدنى لوزن المتبرع بالكيلوغرام' },
+  }
+
+  function getParamDescription(key: string, dbDesc: string | null): string {
+    const entry = paramDescriptions[key]
+    if (entry) return entry[lang as 'en' | 'ar'] ?? dbDesc ?? ''
+    return dbDesc ?? ''
+  }
+
   const paramIcons: Record<string, string> = {
     shortage_threshold_critical: 'crisis_alert',
-    shortage_threshold_warning: 'warning',
-    eligibility_days: 'schedule',
-    eligibility_gap_days: 'schedule',
-    donation_interval_days: 'event_repeat',
-    notification_radius_km: 'my_location',
-    forecast_horizon_weeks: 'trending_up',
-    max_appointments_per_day: 'calendar_today',
-    appointment_slot_minutes: 'timer',
-    min_inventory_units: 'inventory_2',
-    recommendation_top_n: 'person_search',
-    ai_confidence_threshold: 'analytics',
+    shortage_threshold_warning:  'warning',
+    shortage_threshold_units:    'crisis_alert',
+    eligibility_days:            'schedule',
+    eligibility_gap_days:        'schedule',
+    donation_interval_days:      'event_repeat',
+    notification_radius_km:      'my_location',
+    forecast_horizon_weeks:      'trending_up',
+    max_appointments_per_day:    'calendar_today',
+    appointment_slot_minutes:    'timer',
+    min_inventory_units:         'inventory_2',
+    recommendation_top_n:        'person_search',
+    ai_confidence_threshold:     'analytics',
+    max_age_years:               'elderly',
+    min_age_years:               'person',
+    min_weight_kg:               'monitor_weight',
   }
 
   const serviceLabel = serviceStatus === 'checking'
@@ -375,7 +403,7 @@ export default function SystemSettings() {
                     {formatParamLabel(param.key)}
                   </h3>
                   {param.description && (
-                    <p className="text-xs text-on-surface-variant">{param.description}</p>
+                    <p className="text-xs text-on-surface-variant">{getParamDescription(param.key, param.description)}</p>
                   )}
                 </div>
               </div>
