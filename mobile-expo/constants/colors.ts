@@ -1,0 +1,53 @@
+const primary = "#C0392B";
+const primaryDark = "#922B21";
+const primaryLight = "#E74C3C";
+const accent = "#F39C12";
+
+export default {
+  light: {
+    text: "#1A1A2E",
+    textSecondary: "#6B7280",
+    textMuted: "#9CA3AF",
+    background: "#FAFAFA",
+    card: "#FFFFFF",
+    cardBorder: "#F0F0F0",
+    primary,
+    primaryDark,
+    primaryLight,
+    accent,
+    success: "#27AE60",
+    warning: "#F39C12",
+    danger: "#E74C3C",
+    tint: primary,
+    tabIconDefault: "#C0C0C0",
+    tabIconSelected: primary,
+    separator: "#F3F4F6",
+    inputBg: "#F8F9FA",
+    inputBorder: "#E5E7EB",
+    overlay: "rgba(0,0,0,0.5)",
+    shadow: "rgba(192,57,43,0.15)",
+  },
+  dark: {
+    text: "#F1F5F9",
+    textSecondary: "#94A3B8",
+    textMuted: "#64748B",
+    background: "#0F172A",
+    card: "#1E293B",
+    cardBorder: "#334155",
+    primary: "#C0392B",
+    primaryDark: "#922B21",
+    primaryLight: "#E74C3C",
+    accent: "#F39C12",
+    success: "#27AE60",
+    warning: "#F39C12",
+    danger: "#E74C3C",
+    tint: "#C0392B",
+    tabIconDefault: "#475569",
+    tabIconSelected: "#C0392B",
+    separator: "#1E293B",
+    inputBg: "#1E293B",
+    inputBorder: "#334155",
+    overlay: "rgba(0,0,0,0.7)",
+    shadow: "rgba(192,57,43,0.2)",
+  },
+};

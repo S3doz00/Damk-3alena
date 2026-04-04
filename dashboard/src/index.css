@@ -1,0 +1,245 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+
+@theme {
+  /* Damk 3alena — Dark Command Center */
+  --color-primary: #E11D48;
+  --color-primary-container: #881337;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #fecdd3;
+  --color-primary-fixed: rgba(225, 29, 72, 0.12);
+  --color-primary-fixed-dim: rgba(225, 29, 72, 0.20);
+
+  --color-secondary: #F59E0B;
+  --color-secondary-container: #78350F;
+  --color-on-secondary: #000000;
+  --color-on-secondary-container: #fde68a;
+  --color-secondary-fixed: rgba(245, 158, 11, 0.12);
+
+  --color-tertiary: #10B981;
+  --color-tertiary-container: #064E3B;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #a7f3d0;
+
+  --color-error: #F43F5E;
+  --color-error-container: rgba(244, 63, 94, 0.12);
+  --color-on-error: #ffffff;
+
+  --color-background: #070711;
+  --color-on-background: #E2E8F0;
+  --color-surface: #0C0C1A;
+  --color-on-surface: #E2E8F0;
+  --color-on-surface-variant: #64748B;
+  --color-surface-bright: #171728;
+  --color-surface-dim: #050509;
+  --color-surface-container: #111122;
+  --color-surface-container-low: #0E0E1C;
+  --color-surface-container-high: #1A1A2E;
+  --color-surface-container-highest: #20203A;
+  --color-surface-container-lowest: #0A0A18;
+
+  --color-outline: rgba(255, 255, 255, 0.08);
+  --color-outline-variant: rgba(255, 255, 255, 0.04);
+
+  --color-inverse-surface: #E2E8F0;
+  --color-inverse-on-surface: #0C0C1A;
+  --color-inverse-primary: #9F1239;
+
+  --font-headline: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Light theme overrides — warm parchment/beige palette */
+[data-theme="light"] {
+  --color-background: #F2EAD8;
+  --color-on-background: #2C1F0E;
+  --color-surface: #FBF7EF;
+  --color-on-surface: #2C1F0E;
+  --color-on-surface-variant: #6B5740;
+  --color-surface-bright: #FDFAF4;
+  --color-surface-dim: #C9B99A;
+  --color-surface-container: #E8DEC8;
+  --color-surface-container-low: #EFE7D4;
+  --color-surface-container-high: #DDD0B8;
+  --color-surface-container-highest: #D1C09E;
+  --color-surface-container-lowest: #FAF6EC;
+
+  --color-primary-container: #E11D48;
+  --color-on-primary-container: #FFFFFF;
+  --color-primary-fixed: rgba(225, 29, 72, 0.08);
+  --color-primary-fixed-dim: rgba(225, 29, 72, 0.15);
+
+  --color-outline: rgba(100, 72, 30, 0.18);
+  --color-outline-variant: rgba(100, 72, 30, 0.09);
+
+  --color-inverse-surface: #2C1F0E;
+  --color-inverse-on-surface: #F2EAD8;
+  --color-inverse-primary: #9F1239;
+
+  --color-secondary: #C07A20;
+  --color-secondary-container: #FDECC8;
+  --color-on-secondary-container: #5C3A08;
+  --color-tertiary-container: #CDF5E4;
+  --color-on-tertiary-container: #064E3B;
+  --color-error-container: rgba(244, 63, 94, 0.10);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-outline); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-on-surface-variant); opacity: 0.3; }
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.25), 0 0 20px rgba(225, 29, 72, 0.05); }
+  50% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0), 0 0 30px rgba(225, 29, 72, 0.12); }
+}
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+@keyframes glass-shine {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(300%) skewX(-15deg); }
+}
+
+/* Glass card shimmer — add class "glass-card" to trigger */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.04) 50%,
+    transparent 60%
+  );
+  animation: glass-shine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ── About Page: Liquid Glass Effects ── */
+
+.about-glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    inset 1px 1px 1px 0 rgba(255,255,255,0.08),
+    inset -1px -1px 1px 0 rgba(255,255,255,0.04),
+    0 8px 32px rgba(0,0,0,0.15);
+}
+
+.about-glass-btn {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--color-on-surface);
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.06);
+}
+.about-glass-btn:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.16);
+}
+
+.about-glass-badge {
+  background: rgba(225,29,72,0.06);
+  border: 1px solid rgba(225,29,72,0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.about-gradient-text {
+  background: linear-gradient(135deg, #E11D48 0%, #FB7185 40%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Floating orbs */
+.about-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+.about-orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(225,29,72,0.3) 0%, transparent 70%);
+  top: -10%; left: -10%;
+  animation: about-float-1 20s ease-in-out infinite;
+}
+.about-orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
+  bottom: 10%; right: -5%;
+  animation: about-float-2 25s ease-in-out infinite;
+}
+.about-orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(13,148,136,0.2) 0%, transparent 70%);
+  top: 40%; left: 30%;
+  animation: about-float-3 30s ease-in-out infinite;
+}
+
+@keyframes about-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, 40px) scale(1.1); }
+  66% { transform: translate(-30px, 60px) scale(0.95); }
+}
+@keyframes about-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-50px, -30px) scale(1.05); }
+  66% { transform: translate(40px, -50px) scale(0.9); }
+}
+@keyframes about-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, 30px) scale(1.15); }
+}
+
+/* Fade-in animations */
+.about-fade-in {
+  animation: about-slide-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+.about-delay-1 { animation-delay: 0.15s; }
+.about-delay-2 { animation-delay: 0.3s; }
+.about-delay-3 { animation-delay: 0.45s; }
+
+@keyframes about-slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Light theme adjustments for about page */
+[data-theme="light"] .about-glass-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
+  box-shadow:
+    inset 1px 1px 1px 0 rgba(255,255,255,0.5),
+    inset -1px -1px 1px 0 rgba(255,255,255,0.3),
+    0 8px 32px rgba(0,0,0,0.08);
+}
+[data-theme="light"] .about-glass-btn {
+  background: rgba(255,255,255,0.5);
+  border-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .about-glass-btn:hover {
+  background: rgba(255,255,255,0.7);
+  border-color: rgba(0,0,0,0.12);
+}
+[data-theme="light"] .about-orb { opacity: 0.2; }
