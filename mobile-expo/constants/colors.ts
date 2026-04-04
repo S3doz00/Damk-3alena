@@ -1,31 +1,36 @@
-const primary = "#C0392B";
-const primaryDark = "#922B21";
-const primaryLight = "#E74C3C";
-const accent = "#F39C12";
+// Primary matches the dashboard: #E11D48
+const primary = "#E11D48";
+const primaryDark = "#BE123C";
+const primaryLight = "#FB7185";
+const accent = "#F59E0B";
 
 export default {
   light: {
     text: "#1A1A2E",
     textSecondary: "#6B7280",
     textMuted: "#9CA3AF",
-    background: "#FAFAFA",
+    background: "#F8F4EF",
     card: "#FFFFFF",
-    cardBorder: "#F0F0F0",
+    cardBorder: "#F0EBE3",
     primary,
     primaryDark,
     primaryLight,
     accent,
-    success: "#27AE60",
-    warning: "#F39C12",
-    danger: "#E74C3C",
+    success: "#10B981",
+    warning: "#F59E0B",
+    danger: "#E11D48",
     tint: primary,
     tabIconDefault: "#C0C0C0",
     tabIconSelected: primary,
-    separator: "#F3F4F6",
-    inputBg: "#F8F9FA",
-    inputBorder: "#E5E7EB",
+    separator: "#F0EBE3",
+    inputBg: "#F5F0EA",
+    inputBorder: "#E5DDD5",
     overlay: "rgba(0,0,0,0.5)",
-    shadow: "rgba(192,57,43,0.15)",
+    shadow: "rgba(225,29,72,0.12)",
+    // glass helpers
+    glassStart: "rgba(255,255,255,0.85)",
+    glassEnd: "rgba(255,255,255,0.65)",
+    glassBorder: "rgba(255,255,255,0.9)",
   },
   dark: {
     text: "#F1F5F9",
@@ -34,20 +39,24 @@ export default {
     background: "#0F172A",
     card: "#1E293B",
     cardBorder: "#334155",
-    primary: "#C0392B",
-    primaryDark: "#922B21",
-    primaryLight: "#E74C3C",
-    accent: "#F39C12",
-    success: "#27AE60",
-    warning: "#F39C12",
-    danger: "#E74C3C",
-    tint: "#C0392B",
+    primary,
+    primaryDark,
+    primaryLight,
+    accent,
+    success: "#10B981",
+    warning: "#F59E0B",
+    danger: "#E11D48",
+    tint: primary,
     tabIconDefault: "#475569",
-    tabIconSelected: "#C0392B",
+    tabIconSelected: primary,
     separator: "#1E293B",
     inputBg: "#1E293B",
     inputBorder: "#334155",
     overlay: "rgba(0,0,0,0.7)",
-    shadow: "rgba(192,57,43,0.2)",
+    shadow: "rgba(225,29,72,0.2)",
+    // glass helpers
+    glassStart: "rgba(30,41,59,0.9)",
+    glassEnd: "rgba(15,23,42,0.8)",
+    glassBorder: "rgba(51,65,85,0.8)",
   },
 };

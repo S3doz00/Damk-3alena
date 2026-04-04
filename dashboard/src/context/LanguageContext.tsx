@@ -19,6 +19,56 @@ const translations: Record<string, Record<Lang, string>> = {
   systemSettings:   { en: 'System Settings', ar: 'إعدادات النظام' },
   appearance:       { en: 'Appearance',      ar: 'المظهر' },
   signOut:          { en: 'Sign Out',        ar: 'تسجيل الخروج' },
+  language:         { en: 'Language',        ar: 'اللغة' },
+
+  // Theme labels
+  themeLight:       { en: 'Light',   ar: 'فاتح' },
+  themeDark:        { en: 'Dark',    ar: 'داكن' },
+  themeSystem:      { en: 'System',  ar: 'تلقائي' },
+
+  // About/Landing page
+  heroBadge:        { en: 'AI-Powered Blood Donation Platform', ar: 'منصة تبرع بالدم مدعومة بالذكاء الاصطناعي' },
+  heroTitle1:       { en: 'Every Drop',      ar: 'كل قطرة' },
+  heroTitle2:       { en: 'Saves a Life',    ar: 'تنقذ حياة' },
+  heroDesc:         { en: "Jordan's first AI-driven blood donation platform. Predicting shortages, matching donors, and connecting hospitals — in real time.", ar: 'أول منصة ذكاء اصطناعي للتبرع بالدم في الأردن. تتنبأ بالنقص، وتطابق المتبرعين، وتربط المستشفيات — في الوقت الفعلي.' },
+  openDashboard:    { en: 'Open Dashboard',  ar: 'فتح لوحة التحكم' },
+  exploreFeatures:  { en: 'Explore Features', ar: 'استكشف المميزات' },
+  dashboardLogin:   { en: 'Dashboard Login', ar: 'دخول لوحة التحكم' },
+  builtForImpact:   { en: 'Built for', ar: 'مبني من أجل' },
+  builtForImpact2:  { en: 'Impact',   ar: 'التأثير' },
+  builtForDesc:     { en: 'Combining artificial intelligence with healthcare to build a smarter blood supply chain.', ar: 'دمج الذكاء الاصطناعي مع الرعاية الصحية لبناء سلسلة تبرع بالدم أذكى.' },
+  poweredBy:        { en: 'Powered', ar: 'مدعوم' },
+  poweredBy2:       { en: 'By',      ar: 'من' },
+  readyTitle:       { en: 'Ready to Save Lives?', ar: 'مستعد لإنقاذ الأرواح؟' },
+  readyDesc:        { en: 'Access the dashboard to manage blood requests, view AI insights, and coordinate with donors.', ar: 'ادخل لوحة التحكم لإدارة طلبات الدم، وعرض تحليلات الذكاء الاصطناعي، والتنسيق مع المتبرعين.' },
+  goToDashboard:    { en: 'Go to Dashboard', ar: 'الذهاب للوحة التحكم' },
+  footerText:       { en: 'Damk 3alena — Built in Jordan with AI', ar: 'دمك علينا — مبني في الأردن بالذكاء الاصطناعي' },
+  adminLabel:       { en: 'Admin', ar: 'الإدارة' },
+
+  // Stat labels (about page)
+  statBloodTypes:   { en: 'Blood Types Tracked',  ar: 'فصائل الدم المتتبعة' },
+  statWeeks:        { en: 'Weeks Forecast Ahead',  ar: 'أسابيع توقع مسبق' },
+  statRealtime:     { en: 'Realtime Monitoring',   ar: 'مراقبة فورية' },
+  statAI:           { en: 'Powered Matching',      ar: 'توفيق بالذكاء الاصطناعي' },
+
+  // Feature cards (about page)
+  feat1Title: { en: 'AI-Powered Forecasting',  ar: 'توقع مدعوم بالذكاء الاصطناعي' },
+  feat1Desc:  { en: 'Machine learning predicts blood demand weeks ahead, preventing critical shortages before they happen.', ar: 'يتنبأ تعلم الآلة بالطلب على الدم قبل أسابيع، مما يمنع النقص الحرج قبل حدوثه.' },
+  feat2Title: { en: 'Smart Donor Matching',    ar: 'مطابقة المتبرعين الذكية' },
+  feat2Desc:  { en: 'Location-aware algorithms find the best donors by blood type compatibility, distance, and eligibility.', ar: 'تجد الخوارزميات الواعية بالموقع أفضل المتبرعين حسب توافق فصيلة الدم والمسافة والأهلية.' },
+  feat3Title: { en: 'Hospital Dashboard',      ar: 'لوحة تحكم المستشفى' },
+  feat3Desc:  { en: 'Real-time inventory tracking, appointment management, and shortage alerts for healthcare staff.', ar: 'تتبع المخزون في الوقت الفعلي وإدارة المواعيد وتنبيهات النقص للطاقم الصحي.' },
+  feat4Title: { en: 'Mobile Donor App',        ar: 'تطبيق المتبرع المحمول' },
+  feat4Desc:  { en: 'Donors book appointments, track donation history, and receive urgent notifications — all from their phone.', ar: 'يحجز المتبرعون المواعيد ويتتبعون سجل التبرع ويتلقون إشعارات عاجلة — كل ذلك من هواتفهم.' },
+  feat5Title: { en: 'Shortage Detection',      ar: 'اكتشاف النقص' },
+  feat5Desc:  { en: 'Automated alerts when blood inventory drops below critical thresholds, triggering targeted donor outreach.', ar: 'تنبيهات تلقائية عند انخفاض مخزون الدم تحت الحدود الحرجة، مما يفعّل التواصل المستهدف مع المتبرعين.' },
+  feat6Title: { en: 'Live Analytics',          ar: 'تحليلات مباشرة' },
+  feat6Desc:  { en: 'Real-time dashboards showing donation trends, facility performance, and blood type distribution.', ar: 'لوحات بيانات فورية تعرض اتجاهات التبرع وأداء المنشآت وتوزيع فصائل الدم.' },
+
+  // AI Insights - now/predicted
+  now:              { en: 'now',       ar: 'الآن' },
+  predicted:        { en: 'predicted', ar: 'المتوقع' },
+  bloodDemandDesc:  { en: 'Predicted units per blood type per week based on AI model. Lines represent demand trend — higher means more expected donations needed.', ar: 'الوحدات المتوقعة لكل فصيلة دم أسبوعيًا بناءً على نموذج الذكاء الاصطناعي. الخطوط تمثل اتجاه الطلب — كلما ارتفعت كلما زادت الحاجة للتبرع.' },
 
   // Dashboard stat cards
   openRequests:     { en: 'Open Requests',              ar: 'الطلبات المفتوحة' },

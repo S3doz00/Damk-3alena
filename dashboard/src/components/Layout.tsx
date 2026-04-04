@@ -16,10 +16,10 @@ const ADMIN_ITEMS = [
   { to: '/admin/settings', labelKey: 'systemSettings', icon: 'settings' },
 ]
 
-const THEME_OPTIONS: { mode: ThemeMode; label: string; icon: string }[] = [
-  { mode: 'light', label: 'Light', icon: 'light_mode' },
-  { mode: 'dark', label: 'Dark', icon: 'dark_mode' },
-  { mode: 'system', label: 'System', icon: 'brightness_auto' },
+const THEME_OPTIONS: { mode: ThemeMode; labelKey: string; icon: string }[] = [
+  { mode: 'light', labelKey: 'themeLight',  icon: 'light_mode' },
+  { mode: 'dark',  labelKey: 'themeDark',   icon: 'dark_mode' },
+  { mode: 'system',labelKey: 'themeSystem', icon: 'brightness_auto' },
 ]
 
 export default function Layout() {
@@ -84,7 +84,7 @@ export default function Layout() {
 
           <div className="pt-5 pb-1.5 px-3">
             <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">
-              Admin
+              {t('adminLabel')}
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export default function Layout() {
         {/* Language Switcher */}
         <div className="px-3 py-3 border-t border-outline">
           <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2 mb-2">
-            Language
+            {t('language')}
           </p>
           <div className="flex gap-1 p-1 bg-surface-container rounded-xl">
             {(['en', 'ar'] as const).map(l => (
@@ -139,7 +139,7 @@ export default function Layout() {
               <button
                 key={opt.mode}
                 onClick={() => setThemeMode(opt.mode)}
-                title={opt.label}
+                title={t(opt.labelKey)}
                 className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
                   themeMode === opt.mode
                     ? 'bg-primary/10 text-primary'
@@ -147,7 +147,7 @@ export default function Layout() {
                 }`}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{opt.icon}</span>
-                <span className="text-[10px]">{opt.label}</span>
+                <span className="text-[10px]">{t(opt.labelKey)}</span>
               </button>
             ))}
           </div>

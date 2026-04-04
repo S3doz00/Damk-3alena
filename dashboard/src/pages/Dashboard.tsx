@@ -84,6 +84,7 @@ export default function Dashboard() {
       { day: 'Tue', bookings: 8 },
       { day: 'Wed', bookings: 15 },
       { day: 'Thu', bookings: 22 },
+      { day: 'Fri', bookings: 14 },
     ])
 
     setLoading(false)
@@ -111,11 +112,16 @@ export default function Dashboard() {
   }))
 
   // Simulated weekly trend data for area chart (last 4 weeks)
+  const weekLabel = (weeksAgo: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() - weeksAgo * 7)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
   const trendData = [
-    { week: 'W-3', donations: 38, requests: 22, fulfilled: 20 },
-    { week: 'W-2', donations: 42, requests: 18, fulfilled: 17 },
-    { week: 'W-1', donations: 35, requests: 25, fulfilled: 22 },
-    { week: 'Now', donations: weeklyBookings.reduce((s, d) => s + d.bookings, 0), requests: stats.totalRequests, fulfilled: stats.totalRequests - stats.openRequests },
+    { week: weekLabel(3), donations: 38, requests: 22, fulfilled: 20 },
+    { week: weekLabel(2), donations: 42, requests: 18, fulfilled: 17 },
+    { week: weekLabel(1), donations: 35, requests: 25, fulfilled: 22 },
+    { week: 'Now',        donations: weeklyBookings.reduce((s, d) => s + d.bookings, 0), requests: stats.totalRequests, fulfilled: stats.totalRequests - stats.openRequests },
   ]
 
   return (

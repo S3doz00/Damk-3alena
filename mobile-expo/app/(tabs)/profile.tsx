@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { Donation, useApp } from "@/context/AppContext";
 
 const BLOOD_COLORS: Record<string, string> = {
@@ -95,6 +96,7 @@ export default function ProfileScreen() {
   const { profile, donations, logout } = useApp();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useLanguage();
 
   const topPad = Platform.OS === "web" ? Math.max(insets.top, 67) : insets.top;
   const botPad = Platform.OS === "web" ? Math.max(insets.bottom, 34) : insets.bottom;
@@ -106,13 +108,13 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     if (Platform.OS === "web") {
-      if (window.confirm("Are you sure you want to sign out?")) {
+      if (window.confirm(t('signOutConfirm'))) {
         doLogout();
       }
     } else {
-      Alert.alert("Sign Out", "Are you sure you want to sign out?", [
-        { text: "Cancel", style: "cancel" },
-        { text: "Sign Out", style: "destructive", onPress: doLogout },
+      Alert.alert(t('signOut'), t('signOutConfirm'), [
+        { text: t('cancel'), style: "cancel" },
+        { text: t('signOut'), style: "destructive", onPress: doLogout },
       ]);
     }
   };
@@ -188,15 +190,15 @@ export default function ProfileScreen() {
       borderWidth: 1, borderColor: colors.separator, overflow: "hidden",
     },
     actionRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16 },
-    actionIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#FEF2F2", alignItems: "center", justifyContent: "center" },
+    actionIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "10", alignItems: "center", justifyContent: "center" },
     actionLabel: { flex: 1, fontSize: 15, fontWeight: "600", color: colors.text },
     actionDivider: { height: 1, backgroundColor: colors.separator, marginLeft: 70 },
     signOutBtn: {
       flexDirection: "row", alignItems: "center", justifyContent: "center",
       gap: 10, paddingVertical: 16, borderRadius: 16,
-      borderWidth: 2, borderColor: "#FEE2E2", backgroundColor: "#FFF5F5",
+      borderWidth: 2, borderColor: colors.primary + "30", backgroundColor: colors.primary + "08",
     },
-    signOutText: { fontSize: 16, fontWeight: "700", color: "#E74C3C" },
+    signOutText: { fontSize: 16, fontWeight: "700", color: colors.primary },
   });
 
   return (
@@ -207,7 +209,7 @@ export default function ProfileScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.pageTitle}>Profile</Text>
+        <Text style={styles.pageTitle}>{t('profile')}</Text>
         <TouchableOpacity style={styles.settingsBtn} onPress={() => router.push("/settings")}>
           <Feather name="settings" size={20} color={colors.text} />
         </TouchableOpacity>
@@ -239,7 +241,7 @@ export default function ProfileScreen() {
           <View style={styles.profileMetaItem}>
             <Feather name="user" size={12} color={colors.textMuted} />
             <Text style={styles.profileMetaText}>
-              {profile?.gender === "male" ? "Male" : profile?.gender === "female" ? "Female" : "—"}
+              {profile?.gender === "male" ? t('male') : profile?.gender === "female" ? t('female') : "—"}
             </Text>
           </View>
           {profile?.dateOfBirth && (
@@ -256,27 +258,27 @@ export default function ProfileScreen() {
 
       {/* Donation stats */}
       <View style={styles.sectionWrap}>
-        <Text style={styles.sectionTitle}>DONATION STATISTICS</Text>
+        <Text style={styles.sectionTitle}>{t('donationStats')}</Text>
         <View style={styles.statsRow}>
           <StatCard
-            label="Total Donations"
+            label={t('totalDonations')}
             value={totalDonations.toString()}
             icon="droplet"
             color={colors.primary}
             colors={colors}
           />
           <StatCard
-            label="Last Donation"
-            value={lastDonationDate ? formatDate(lastDonationDate) : "None yet"}
+            label={t('lastDonationStat')}
+            value={lastDonationDate ? formatDate(lastDonationDate) : t('noneYet')}
             icon="calendar"
-            color="#8E44AD"
+            color="#7C3AED"
             colors={colors}
           />
           <StatCard
-            label="Next Eligible"
+            label={t('nextEligible')}
             value={nextEligibleDate}
             icon="clock"
-            color="#27AE60"
+            color="#10B981"
             colors={colors}
           />
         </View>
@@ -285,10 +287,10 @@ export default function ProfileScreen() {
       {/* Donation history */}
       <View style={styles.sectionWrap}>
         <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>DONATION HISTORY</Text>
+          <Text style={styles.sectionTitle}>{t('donationHistory')}</Text>
           {completedDonations.length > 0 && (
             <View style={styles.donationCountBadge}>
-              <Text style={styles.donationCountText}>{completedDonations.length} donations</Text>
+              <Text style={styles.donationCountText}>{completedDonations.length} {t('donations')}</Text>
             </View>
           )}
         </View>
@@ -298,11 +300,11 @@ export default function ProfileScreen() {
             <View style={styles.emptyHistoryIcon}>
               <Feather name="droplet" size={28} color={colors.textMuted} />
             </View>
-            <Text style={styles.emptyHistoryTitle}>No Donations Yet</Text>
-            <Text style={styles.emptyHistorySubtitle}>Start your journey and help save lives</Text>
+            <Text style={styles.emptyHistoryTitle}>{t('noDonationsTitle')}</Text>
+            <Text style={styles.emptyHistorySubtitle}>{t('noDonationsDesc')}</Text>
             <TouchableOpacity style={styles.donateNowBtn} onPress={() => router.push("/(tabs)/maps")} activeOpacity={0.85}>
               <Feather name="map-pin" size={16} color="#fff" />
-              <Text style={styles.donateNowText}>Find a Hospital</Text>
+              <Text style={styles.donateNowText}>{t('findHospitalBtn')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -316,12 +318,12 @@ export default function ProfileScreen() {
 
       {/* Quick actions */}
       <View style={styles.sectionWrap}>
-        <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
+        <Text style={styles.sectionTitle}>{t('quickActions')}</Text>
         <View style={styles.actionsCard}>
           {[
-            { icon: "map", label: "Find a Hospital", onPress: () => router.push("/(tabs)/maps") },
-            { icon: "alert-triangle", label: "Urgent Requests", onPress: () => router.push("/(tabs)/urgent") },
-            { icon: "bell", label: "Notifications", onPress: () => router.push("/notifications") },
+            { icon: "map", labelKey: "findHospitalBtn", onPress: () => router.push("/(tabs)/maps") },
+            { icon: "alert-triangle", labelKey: "urgentRequests", onPress: () => router.push("/(tabs)/urgent") },
+            { icon: "bell", labelKey: "notifications", onPress: () => router.push("/notifications") },
           ].map((a, i, arr) => (
             <React.Fragment key={a.label}>
               <TouchableOpacity
@@ -332,7 +334,7 @@ export default function ProfileScreen() {
                 <View style={styles.actionIcon}>
                   <Feather name={a.icon as any} size={18} color={colors.primary} />
                 </View>
-                <Text style={styles.actionLabel}>{a.label}</Text>
+                <Text style={styles.actionLabel}>{t(a.labelKey)}</Text>
                 <Feather name="chevron-right" size={18} color={colors.textMuted} />
               </TouchableOpacity>
               {i < arr.length - 1 && <View style={styles.actionDivider} />}
@@ -344,8 +346,8 @@ export default function ProfileScreen() {
       {/* Sign out */}
       <View style={styles.sectionWrap}>
         <TouchableOpacity style={styles.signOutBtn} onPress={handleLogout} activeOpacity={0.8}>
-          <Feather name="log-out" size={18} color="#E74C3C" />
-          <Text style={styles.signOutText}>Sign Out</Text>
+          <Feather name="log-out" size={18} color={colors.primary} />
+          <Text style={[styles.signOutText, { color: colors.primary }]}>{t('signOut')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

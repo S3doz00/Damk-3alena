@@ -173,7 +173,7 @@ export default function AIOutputs() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-on-surface leading-snug">{alert.message}</p>
                   <p className="text-xs text-on-surface-variant mt-0.5">
-                    {alert.current_units} {t('nowPredicted').split('→')[0].trim()} → {alert.predicted_units} {t('nowPredicted').split('→')[1]?.trim() || 'predicted'}
+                    {alert.current_units} {t('now')} → {alert.predicted_units} {t('predicted')}
                   </p>
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function AIOutputs() {
 
       {/* Forecast Chart */}
       <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="font-headline font-bold text-base text-on-surface">{t('bloodDemandForecast')}</h2>
           {forecastChartData.length === 1 && (
             <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
@@ -192,6 +192,7 @@ export default function AIOutputs() {
             </span>
           )}
         </div>
+        <p className="text-xs text-on-surface-variant mb-5 max-w-xl">{t('bloodDemandDesc')}</p>
 
         {forecastChartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>

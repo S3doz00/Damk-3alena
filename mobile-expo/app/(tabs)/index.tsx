@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
 import {
@@ -12,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useHospitals } from "@/lib/hooks";
 import { useApp, Appointment } from "@/context/AppContext";
 
@@ -22,143 +24,106 @@ function eligibilityDaysLeft(lastDonation: string | null): number {
   return Math.max(0, 90 - daysDone);
 }
 
-function formatDate(d: Date) {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-const URGENCY_COLORS = { critical: "#C0392B", urgent: "#E67E22", pending: "#2980B9" };
+const BLOOD_COLORS: Record<string, string> = {
+  "O-": "#BE123C", "O+": "#E11D48", "A+": "#7C3AED",
+  "A-": "#9B59B6", "B+": "#2563EB", "B-": "#3498DB",
+  "AB+": "#0D9488", "AB-": "#1ABC9C",
+};
 
 function UpcomingAppointmentCard({ appointment }: { appointment: Appointment }) {
-  const { colors } = useTheme();
-  const bloodColors: Record<string, string> = {
-    "O-": "#C0392B", "O+": "#E74C3C", "A+": "#8E44AD",
-    "A-": "#9B59B6", "B+": "#2980B9", "B-": "#3498DB",
-    "AB+": "#16A085", "AB-": "#1ABC9C",
-  };
-  const bloodColor = bloodColors[appointment.bloodType] || colors.primary;
-
-  const styles = StyleSheet.create({
-    ticketCard: {
-      flexDirection: "row", alignItems: "center",
-      backgroundColor: colors.card, borderRadius: 20, overflow: "hidden",
-      shadowColor: "#000", shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 4,
-      borderWidth: 1, borderColor: colors.separator,
-    },
-    ticketLeft: {
-      width: 70, alignItems: "center", justifyContent: "center",
-      paddingVertical: 20, gap: 4,
-    },
-    ticketBloodType: { fontSize: 13, fontWeight: "800", color: "#fff" },
-    ticketBody: { flex: 1, padding: 14, gap: 6 },
-    ticketFileRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-    ticketFileNum: { fontSize: 18, fontWeight: "900", color: colors.text, letterSpacing: 0.5 },
-    ticketUpcomingBadge: { flexDirection: "row", alignItems: "center", backgroundColor: "#D1FAE5", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    ticketUpcomingText: { fontSize: 10, fontWeight: "700", color: "#27AE60" },
-    ticketHospital: { fontSize: 14, fontWeight: "600", color: colors.textSecondary },
-    ticketMeta: { flexDirection: "row", gap: 14, marginTop: 4 },
-    ticketMetaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
-    ticketMetaText: { fontSize: 12, color: colors.textMuted },
-  });
+  const { colors, isDark } = useTheme();
+  const { t } = useLanguage();
+  const bloodColor = BLOOD_COLORS[appointment.bloodType] || colors.primary;
 
   return (
     <TouchableOpacity
-      style={styles.ticketCard}
       onPress={() => router.push({ pathname: "/appointment/ticket", params: { appointmentId: appointment.id } })}
       activeOpacity={0.88}
+      style={{ borderRadius: 20, overflow: "hidden", shadowColor: bloodColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 6 }}
     >
-      <View style={[styles.ticketLeft, { backgroundColor: bloodColor }]}>
-        <Feather name="droplet" size={22} color="#fff" />
-        <Text style={styles.ticketBloodType}>{appointment.bloodType}</Text>
-      </View>
-      <View style={styles.ticketBody}>
-        <View style={styles.ticketFileRow}>
-          <Text style={styles.ticketFileNum}>{appointment.fileNumber}</Text>
-          <View style={styles.ticketUpcomingBadge}>
-            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#27AE60", marginRight: 4 }} />
-            <Text style={styles.ticketUpcomingText}>Upcoming</Text>
+      <LinearGradient
+        colors={isDark ? ["rgba(30,41,59,0.95)", "rgba(15,23,42,0.9)"] : ["rgba(255,255,255,0.95)", "rgba(248,244,239,0.9)"]}
+        style={{ flexDirection: "row", alignItems: "center", borderRadius: 20, borderWidth: 1, borderColor: isDark ? "rgba(51,65,85,0.8)" : "rgba(255,255,255,0.9)" }}
+      >
+        <View style={{ width: 70, alignItems: "center", justifyContent: "center", paddingVertical: 20, gap: 4, backgroundColor: bloodColor, borderTopLeftRadius: 20, borderBottomLeftRadius: 20 }}>
+          <Feather name="droplet" size={22} color="#fff" />
+          <Text style={{ fontSize: 13, fontWeight: "800", color: "#fff" }}>{appointment.bloodType}</Text>
+        </View>
+        <View style={{ flex: 1, padding: 14, gap: 6 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Text style={{ fontSize: 18, fontWeight: "900", color: colors.text, letterSpacing: 0.5 }}>{appointment.fileNumber}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#D1FAE5", borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#10B981", marginRight: 4 }} />
+              <Text style={{ fontSize: 10, fontWeight: "700", color: "#047857" }}>{t('upcoming')}</Text>
+            </View>
+          </View>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.textSecondary }} numberOfLines={1}>{appointment.hospitalName}</Text>
+          <View style={{ flexDirection: "row", gap: 14, marginTop: 4 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Feather name="calendar" size={12} color={colors.textMuted} />
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>{appointment.date}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+              <Feather name="clock" size={12} color={colors.textMuted} />
+              <Text style={{ fontSize: 12, color: colors.textMuted }}>{appointment.time}</Text>
+            </View>
           </View>
         </View>
-        <Text style={styles.ticketHospital} numberOfLines={1}>{appointment.hospitalName}</Text>
-        <View style={styles.ticketMeta}>
-          <View style={styles.ticketMetaItem}>
-            <Feather name="calendar" size={12} color={colors.textMuted} />
-            <Text style={styles.ticketMetaText}>{appointment.date}</Text>
-          </View>
-          <View style={styles.ticketMetaItem}>
-            <Feather name="clock" size={12} color={colors.textMuted} />
-            <Text style={styles.ticketMetaText}>{appointment.time}</Text>
-          </View>
-        </View>
-      </View>
-      <Feather name="chevron-right" size={18} color={colors.textMuted} />
+        <Feather name="chevron-right" size={18} color={colors.textMuted} style={{ marginRight: 14 }} />
+      </LinearGradient>
     </TouchableOpacity>
   );
 }
 
 function EligibilityCard({ daysLeft, lastDonation }: { daysLeft: number; lastDonation: string | null }) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  const { t } = useLanguage();
   const isEligible = daysLeft === 0;
   const progress = isEligible ? 1 : (90 - daysLeft) / 90;
-
-  const styles = StyleSheet.create({
-    eligibilityCard: {
-      backgroundColor: colors.card, borderRadius: 20, padding: 18,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
-      borderWidth: 1, borderColor: colors.separator,
-      borderLeftWidth: 4,
-    },
-    eligibilityTop: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 },
-    eligibilityIcon: {
-      width: 44, height: 44, borderRadius: 13, backgroundColor: "#FEF2F2",
-      alignItems: "center", justifyContent: "center",
-    },
-    eligibilityTitle: { fontSize: 17, fontWeight: "800", color: colors.text, marginBottom: 2 },
-    eligibilitySubtitle: { fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
-    eligibilityBadge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
-    progressContainer: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
-    progressBar: { flex: 1, height: 6, backgroundColor: colors.separator, borderRadius: 3, overflow: "hidden" },
-    progressFill: { height: "100%", borderRadius: 3 },
-    progressLabel: { fontSize: 12, fontWeight: "700", color: colors.primary, width: 36, textAlign: "right" },
-    lastDonationText: { fontSize: 12, color: colors.textMuted, fontWeight: "500" },
-  });
+  const accentColor = isEligible ? "#10B981" : colors.primary;
 
   return (
-    <View style={[styles.eligibilityCard, { borderLeftColor: isEligible ? "#27AE60" : colors.primary }]}>
-      <View style={styles.eligibilityTop}>
-        <View style={styles.eligibilityIcon}>
-          <Feather name={isEligible ? "check-circle" : "clock"} size={22} color={isEligible ? "#27AE60" : colors.primary} />
+    <LinearGradient
+      colors={isDark ? ["rgba(30,41,59,0.95)", "rgba(15,23,42,0.9)"] : ["rgba(255,255,255,0.95)", "rgba(248,244,239,0.9)"]}
+      style={{
+        borderRadius: 20, padding: 18,
+        shadowColor: accentColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4,
+        borderWidth: 1, borderColor: isDark ? "rgba(51,65,85,0.8)" : "rgba(255,255,255,0.9)",
+        borderLeftWidth: 4, borderLeftColor: accentColor,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 }}>
+        <View style={{ width: 44, height: 44, borderRadius: 13, backgroundColor: accentColor + "20", alignItems: "center", justifyContent: "center" }}>
+          <Feather name={isEligible ? "check-circle" : "clock"} size={22} color={accentColor} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.eligibilityTitle}>
-            {isEligible ? "You Can Donate!" : `${daysLeft} Days Left`}
+          <Text style={{ fontSize: 17, fontWeight: "800", color: colors.text, marginBottom: 2 }}>
+            {isEligible ? t('youCanDonate') : `${daysLeft} ${t('daysLeft')}`}
           </Text>
-          <Text style={styles.eligibilitySubtitle}>
-            {isEligible
-              ? "You are eligible to donate blood today."
-              : `${90 - daysLeft} of 90 days since your last donation`}
+          <Text style={{ fontSize: 13, color: colors.textSecondary, lineHeight: 18 }}>
+            {isEligible ? t('eligibleToday') : `${90 - daysLeft} ${t('of90Days')}`}
           </Text>
         </View>
         {isEligible && (
-          <View style={[styles.eligibilityBadge, { backgroundColor: "#D1FAE5" }]}>
-            <Text style={{ fontSize: 12, fontWeight: "700", color: "#27AE60" }}>Eligible</Text>
+          <View style={{ backgroundColor: "#D1FAE5", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 }}>
+            <Text style={{ fontSize: 12, fontWeight: "700", color: "#047857" }}>{t('eligible')}</Text>
           </View>
         )}
       </View>
       {!isEligible && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` as any, backgroundColor: colors.primary }]} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
+          <View style={{ flex: 1, height: 6, backgroundColor: colors.separator, borderRadius: 3, overflow: "hidden" }}>
+            <View style={{ width: `${Math.round(progress * 100)}%` as any, height: "100%", borderRadius: 3, backgroundColor: accentColor }} />
           </View>
-          <Text style={styles.progressLabel}>{Math.round(progress * 100)}%</Text>
+          <Text style={{ fontSize: 12, fontWeight: "700", color: accentColor, width: 36, textAlign: "right" }}>{Math.round(progress * 100)}%</Text>
         </View>
       )}
       {lastDonation && (
-        <Text style={styles.lastDonationText}>
-          Last donation: {new Date(lastDonation).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+        <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: "500" }}>
+          {t('lastDonation')} {new Date(lastDonation).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </Text>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -166,7 +131,8 @@ export default function HomeScreen() {
   const { profile, appointments, unreadCount } = useApp();
   const { hospitals } = useHospitals();
   const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  const { t } = useLanguage();
 
   const daysLeft = eligibilityDaysLeft(profile?.lastDonationDate ?? null);
   const upcomingAppointments = appointments.filter((a) => a.status === "upcoming");
@@ -181,73 +147,34 @@ export default function HomeScreen() {
   const topPad = Platform.OS === "web" ? Math.max(insets.top, 67) : insets.top;
   const botPad = Platform.OS === "web" ? Math.max(insets.bottom, 34) : insets.bottom;
 
+  const glassCard: any = {
+    borderRadius: 20, overflow: "hidden" as const,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 4,
+  };
+  const glassColors: [string, string] = isDark
+    ? ["rgba(30,41,59,0.95)", "rgba(15,23,42,0.9)"]
+    : ["rgba(255,255,255,0.95)", "rgba(248,244,239,0.88)"];
+  const glassBorder = isDark ? "rgba(51,65,85,0.8)" : "rgba(255,255,255,0.9)";
+
   const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     greeting: { fontSize: 24, fontWeight: "800", color: colors.text, letterSpacing: -0.5 },
     subGreeting: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
     notifBtn: {
       width: 46, height: 46, borderRadius: 14, backgroundColor: colors.card,
       alignItems: "center", justifyContent: "center", position: "relative",
       shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+      borderWidth: 1, borderColor: isDark ? "rgba(51,65,85,0.8)" : "rgba(255,255,255,0.9)",
     },
     badge: {
       position: "absolute", top: 8, right: 8, width: 18, height: 18, borderRadius: 9,
       backgroundColor: colors.primary, alignItems: "center", justifyContent: "center",
-      borderWidth: 2, borderColor: "#fff",
+      borderWidth: 2, borderColor: colors.background,
     },
     badgeText: { fontSize: 10, fontWeight: "700", color: "#fff" },
     sectionLabel: { fontSize: 11, fontWeight: "700", color: colors.textMuted, letterSpacing: 0.8, marginBottom: 10 },
-    noAppointmentCard: {
-      backgroundColor: colors.card, borderRadius: 20, padding: 18,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3,
-      borderWidth: 1, borderColor: colors.separator, gap: 14,
-    },
-    noAppointmentLeft: { flexDirection: "row", alignItems: "center", gap: 14 },
-    noAppointmentIcon: {
-      width: 48, height: 48, borderRadius: 14, backgroundColor: colors.inputBg,
-      alignItems: "center", justifyContent: "center",
-    },
-    noAppointmentTitle: { fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 2 },
-    noAppointmentSubtitle: { fontSize: 12, color: colors.textSecondary },
-    noAppointmentBtn: {
-      flexDirection: "row", alignItems: "center", justifyContent: "center",
-      gap: 6, borderWidth: 1.5, borderColor: colors.primary,
-      borderRadius: 12, paddingVertical: 10,
-    },
-    noAppointmentBtnText: { fontSize: 14, fontWeight: "700", color: colors.primary },
-    bloodTypeCard: {
-      backgroundColor: colors.card, borderRadius: 20, padding: 18, flexDirection: "row", alignItems: "center", gap: 16,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
-      borderWidth: 1, borderColor: colors.separator,
-    },
-    bloodTypeBig: {
-      width: 64, height: 64, borderRadius: 20, backgroundColor: colors.primary,
-      alignItems: "center", justifyContent: "center",
-      shadowColor: colors.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
-    },
-    bloodTypeText: { fontSize: 20, fontWeight: "900", color: "#fff" },
-    bloodTypeTitle: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 },
-    bloodTypeSubtitle: { fontSize: 12, color: colors.textSecondary, lineHeight: 16, marginBottom: 10 },
-    findHospitalBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
-    findHospitalText: { fontSize: 13, fontWeight: "600", color: colors.primary },
     urgentHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
     seeAll: { fontSize: 13, fontWeight: "600", color: colors.primary },
-    urgentCard: {
-      flexDirection: "row", alignItems: "center", gap: 14,
-      backgroundColor: colors.card, borderRadius: 16, padding: 14,
-      shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
-      borderWidth: 1, borderColor: colors.separator, borderLeftWidth: 3, borderLeftColor: colors.primary,
-    },
-    urgentBlood: {
-      width: 46, height: 46, borderRadius: 13, backgroundColor: colors.primary,
-      alignItems: "center", justifyContent: "center",
-    },
-    urgentBloodText: { fontSize: 14, fontWeight: "800", color: "#fff" },
-    urgentHospital: { fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 },
-    urgentCity: { fontSize: 12, color: colors.textSecondary },
-    urgentBadge: { backgroundColor: "#FEE2E2", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
-    urgentBadgeText: { fontSize: 10, fontWeight: "700", color: colors.primary, letterSpacing: 0.5 },
   });
 
   return (
@@ -257,12 +184,12 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View style={[styles.header, { paddingHorizontal: 20 }]}>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20 }}>
         <View>
           <Text style={styles.greeting}>
-            Ahlan, {profile?.firstName || "Donor"} 👋
+            {t('greeting')}, {profile?.firstName || "Donor"} 👋
           </Text>
-          <Text style={styles.subGreeting}>Amman, Jordan</Text>
+          <Text style={styles.subGreeting}>{t('location')}</Text>
         </View>
         <TouchableOpacity style={styles.notifBtn} onPress={() => router.push("/notifications")}>
           <Feather name="bell" size={22} color={colors.text} />
@@ -274,9 +201,9 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Appointment ticket or book CTA */}
+      {/* Upcoming Appointment */}
       <View style={{ paddingHorizontal: 20, marginTop: 20, marginBottom: 4 }}>
-        <Text style={styles.sectionLabel}>UPCOMING APPOINTMENT</Text>
+        <Text style={styles.sectionLabel}>{t('upcomingAppt')}</Text>
       </View>
 
       {nextAppointment ? (
@@ -285,34 +212,34 @@ export default function HomeScreen() {
         </View>
       ) : (
         <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
-          <View style={styles.noAppointmentCard}>
-            <View style={styles.noAppointmentLeft}>
-              <View style={styles.noAppointmentIcon}>
+          <LinearGradient
+            colors={glassColors}
+            style={[glassCard, { padding: 18, gap: 14, borderWidth: 1, borderColor: glassBorder }]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: isDark ? "rgba(51,65,85,0.6)" : "rgba(240,235,227,0.8)", alignItems: "center", justifyContent: "center" }}>
                 <Feather name="calendar" size={24} color={colors.textMuted} />
               </View>
               <View>
-                <Text style={styles.noAppointmentTitle}>No Upcoming Appointment</Text>
-                <Text style={styles.noAppointmentSubtitle}>Help someone in need — donate today</Text>
+                <Text style={{ fontSize: 15, fontWeight: "700", color: colors.text, marginBottom: 2 }}>{t('noApptTitle')}</Text>
+                <Text style={{ fontSize: 12, color: colors.textSecondary }}>{t('noApptSubtitle')}</Text>
               </View>
             </View>
             <TouchableOpacity
-              style={styles.noAppointmentBtn}
-              onPress={() => {
-                Haptics.selectionAsync();
-                router.push("/(tabs)/urgent");
-              }}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderWidth: 1.5, borderColor: colors.primary, borderRadius: 12, paddingVertical: 10 }}
+              onPress={() => { Haptics.selectionAsync(); router.push("/(tabs)/urgent"); }}
               activeOpacity={0.85}
             >
-              <Text style={styles.noAppointmentBtnText}>See Urgent</Text>
+              <Text style={{ fontSize: 14, fontWeight: "700", color: colors.primary }}>{t('seeUrgent')}</Text>
               <Feather name="arrow-right" size={14} color={colors.primary} />
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
         </View>
       )}
 
       {/* Eligibility */}
       <View style={{ paddingHorizontal: 20, marginBottom: 4 }}>
-        <Text style={styles.sectionLabel}>DONATION ELIGIBILITY</Text>
+        <Text style={styles.sectionLabel}>{t('donationEligibility')}</Text>
       </View>
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
         <EligibilityCard daysLeft={daysLeft} lastDonation={profile?.lastDonationDate ?? null} />
@@ -322,29 +249,36 @@ export default function HomeScreen() {
       {profile?.bloodType && (
         <>
           <View style={{ paddingHorizontal: 20, marginBottom: 4 }}>
-            <Text style={styles.sectionLabel}>YOUR BLOOD TYPE</Text>
+            <Text style={styles.sectionLabel}>{t('yourBloodType')}</Text>
           </View>
           <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-            <View style={styles.bloodTypeCard}>
-              <View style={styles.bloodTypeBig}>
-                <Text style={styles.bloodTypeText}>{profile.bloodType}</Text>
+            <LinearGradient
+              colors={glassColors}
+              style={[glassCard, { padding: 18, flexDirection: "row", alignItems: "center", gap: 16, borderWidth: 1, borderColor: glassBorder }]}
+            >
+              <View style={{
+                width: 64, height: 64, borderRadius: 20,
+                backgroundColor: BLOOD_COLORS[profile.bloodType] || colors.primary,
+                alignItems: "center", justifyContent: "center",
+                shadowColor: BLOOD_COLORS[profile.bloodType] || colors.primary,
+                shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 5,
+              }}>
+                <Text style={{ fontSize: 20, fontWeight: "900", color: "#fff" }}>{profile.bloodType}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.bloodTypeTitle}>Blood Type {profile.bloodType}</Text>
-                <Text style={styles.bloodTypeSubtitle}>
-                  {profile.bloodType === "O-"
-                    ? "Universal donor — your blood is the most needed"
-                    : "You can help patients who need your blood type"}
+                <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 4 }}>{t('bloodTypeTitle')} {profile.bloodType}</Text>
+                <Text style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 16, marginBottom: 10 }}>
+                  {profile.bloodType === "O-" ? t('universalDonor') : t('canHelpPatients')}
                 </Text>
                 <TouchableOpacity
-                  style={styles.findHospitalBtn}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
                   onPress={() => router.push("/(tabs)/maps")} activeOpacity={0.85}
                 >
                   <Feather name="map-pin" size={14} color={colors.primary} />
-                  <Text style={styles.findHospitalText}>Find a hospital</Text>
+                  <Text style={{ fontSize: 13, fontWeight: "600", color: colors.primary }}>{t('findHospital')}</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </LinearGradient>
           </View>
         </>
       )}
@@ -354,32 +288,40 @@ export default function HomeScreen() {
         <>
           <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
             <View style={styles.urgentHeader}>
-              <Text style={styles.sectionLabel}>CRITICAL BLOOD NEEDS</Text>
+              <Text style={styles.sectionLabel}>{t('criticalNeeds')}</Text>
               <TouchableOpacity onPress={() => router.push("/(tabs)/urgent")}>
-                <Text style={styles.seeAll}>See all</Text>
+                <Text style={styles.seeAll}>{t('seeAll')}</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={{ paddingHorizontal: 20, gap: 10, marginBottom: 24 }}>
-            {urgentNeeds.map((n, i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.urgentCard}
-                onPress={() => router.push({ pathname: "/appointment/book", params: { hospitalId: n.hospital.id } })}
-                activeOpacity={0.85}
-              >
-                <View style={styles.urgentBlood}>
-                  <Text style={styles.urgentBloodText}>{n.type}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.urgentHospital} numberOfLines={1}>{n.hospital.name}</Text>
-                  <Text style={styles.urgentCity}>{n.hospital.city} · {n.hospital.distance} km</Text>
-                </View>
-                <View style={styles.urgentBadge}>
-                  <Text style={styles.urgentBadgeText}>CRITICAL</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            {urgentNeeds.map((n, i) => {
+              const bloodColor = BLOOD_COLORS[n.type] || colors.primary;
+              return (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => router.push({ pathname: "/appointment/book", params: { hospitalId: n.hospital.id } })}
+                  activeOpacity={0.85}
+                  style={{ borderRadius: 16, overflow: "hidden", shadowColor: bloodColor, shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 3 }}
+                >
+                  <LinearGradient
+                    colors={glassColors}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: glassBorder, borderLeftWidth: 3, borderLeftColor: bloodColor }}
+                  >
+                    <View style={{ width: 46, height: 46, borderRadius: 13, backgroundColor: bloodColor, alignItems: "center", justifyContent: "center" }}>
+                      <Text style={{ fontSize: 14, fontWeight: "800", color: "#fff" }}>{n.type}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 14, fontWeight: "600", color: colors.text, marginBottom: 2 }} numberOfLines={1}>{n.hospital.name}</Text>
+                      <Text style={{ fontSize: 12, color: colors.textSecondary }}>{n.hospital.city} · {n.hospital.distance} km</Text>
+                    </View>
+                    <View style={{ backgroundColor: "#FEE2E2", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 }}>
+                      <Text style={{ fontSize: 10, fontWeight: "700", color: colors.primary, letterSpacing: 0.5 }}>{t('critical')}</Text>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </>
       )}
