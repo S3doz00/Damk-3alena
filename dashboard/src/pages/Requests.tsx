@@ -20,6 +20,7 @@ export default function Requests() {
   const { t } = useLanguage()
   const [requests, setRequests] = useState<BloodRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [clearing, setClearing] = useState(false)
 
   useEffect(() => {
     loadRequests()
@@ -48,6 +49,29 @@ export default function Requests() {
     }
   }
 
+  async function clearClosed() {
+    const closedIds = requests.filter(r => r.status === 'closed').map(r => r.id)
+    if (closedIds.length === 0) return
+    setClearing(true)
+    // Optimistic update
+    setRequests(prev => prev.filter(r => r.status !== 'closed'))
+    try {
+      const { error } = await supabase
+        .from('blood_requests')
+        .delete()
+        .in('id', closedIds)
+      if (error) {
+        console.error('Clear closed failed:', error.message)
+        await loadRequests()
+      }
+    } catch (e) {
+      console.error('Clear closed exception:', e)
+      await loadRequests()
+    } finally {
+      setClearing(false)
+    }
+  }
+
   const urgencyColors: Record<string, string> = {
     normal: 'bg-secondary/10 text-secondary',
     urgent: 'bg-primary/10 text-primary',
@@ -61,14 +85,31 @@ export default function Requests() {
     closed: 'bg-outline/10 text-outline',
   }
 
+  const closedCount = requests.filter(r => r.status === 'closed').length
+
   return (
     <div>
-      <h1 className="font-headline font-extrabold text-2xl text-on-surface tracking-tight mb-1">
-        {t('submittedRequests')}
-      </h1>
-      <p className="text-on-surface-variant text-sm mb-8">
-        {t('submittedRequestsDesc')}
-      </p>
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <h1 className="font-headline font-extrabold text-2xl text-on-surface tracking-tight mb-1">
+            {t('submittedRequests')}
+          </h1>
+          <p className="text-on-surface-variant text-sm">
+            {t('submittedRequestsDesc')}
+          </p>
+        </div>
+        {closedCount > 0 && (
+          <button
+            onClick={clearClosed}
+            disabled={clearing}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-outline/10 hover:bg-outline/20 text-outline text-sm font-semibold transition-all duration-150 border border-outline/20 cursor-pointer disabled:opacity-50 flex-shrink-0"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete_sweep</span>
+            {clearing ? t('clearing') : `${t('clearClosedBtn')} (${closedCount})`}
+          </button>
+        )}
+      </div>
+      <div className="mb-8" />
 
       {loading ? (
         <div className="text-center py-12 text-on-surface-variant">{t('loading')}</div>

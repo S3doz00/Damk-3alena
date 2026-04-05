@@ -9,6 +9,15 @@ interface LanguageContextValue {
 }
 
 const translations: Record<string, Record<Lang, string>> = {
+  // Login page
+  hospitalDashboard:  { en: 'Hospital Dashboard',   ar: 'لوحة التحكم — المستشفى' },
+  loginSubtitle:      { en: 'Log in to manage blood requests and view AI insights.', ar: 'سجّل دخولك لإدارة طلبات الدم وعرض تحليلات الذكاء الاصطناعي.' },
+  workEmail:          { en: 'Work Email',            ar: 'البريد الإلكتروني للعمل' },
+  password:           { en: 'Password',              ar: 'كلمة المرور' },
+  signingIn:          { en: 'Signing in...',         ar: 'جارٍ تسجيل الدخول...' },
+  logIn:              { en: 'Log In',                ar: 'تسجيل الدخول' },
+  secureNetwork:      { en: 'Secure Healthcare Network - Damk 3alena', ar: 'شبكة الرعاية الصحية الآمنة - دمك علينا' },
+
   // Navigation
   dashboard:        { en: 'Dashboard',       ar: 'لوحة التحكم' },
   createRequest:    { en: 'Create Request',  ar: 'طلب دم' },
@@ -121,6 +130,7 @@ const translations: Record<string, Record<Lang, string>> = {
   // Requests page
   submittedRequests:  { en: 'Submitted Requests', ar: 'الطلبات المقدمة' },
   submittedRequestsDesc: { en: 'Manage the status of your blood requests.', ar: 'إدارة حالة طلبات الدم الخاصة بك.' },
+  clearClosedBtn:     { en: 'Clear Closed',       ar: 'حذف المغلقة' },
   loading:            { en: 'Loading...',        ar: 'جارٍ التحميل...' },
   noRequestsYet:      { en: 'No requests yet',   ar: 'لا توجد طلبات بعد' },
   unitNeeded:         { en: 'unit needed',        ar: 'وحدة مطلوبة' },

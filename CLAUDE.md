@@ -4,10 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Damk 3alena** — AI-driven blood donation platform for Jordan. Four-tier architecture:
-- `dashboard/` — React 19 + TypeScript + Vite web admin panel
-- `mobile-expo/` — Expo (React Native) donor app (primary mobile app)
-- `mobile/` — Flutter donor app (legacy, replaced by mobile-expo)
+**Damk 3alena** — AI-driven blood donation platform for Jordan. Three-tier architecture:
+- `dashboard/` — React 19 + TypeScript + Vite web admin panel (hospital staff/admin)
+- `mobile/` — Expo (React Native) donor mobile app
 - `ai-service/` — FastAPI Python microservice for ML predictions
 - `supabase/` — PostgreSQL schema, migrations, and RLS policies
 
@@ -22,20 +21,14 @@ npm run lint      # ESLint
 npm run preview   # Preview production build
 ```
 
-### Mobile (Expo/React Native) — Primary
+### Mobile (Expo/React Native)
 ```bash
 cd mobile-expo
 npm install       # Install dependencies
 npx expo start    # Dev server (Expo Go or simulator)
+npx expo start --clear  # Dev server with cache cleared (use after code changes)
 npx expo run:ios  # Build & run on iOS simulator
 npx expo run:android  # Build & run on Android emulator
-```
-
-### Mobile (Flutter) — Legacy
-```bash
-cd mobile
-flutter pub get   # Install dependencies
-flutter run       # Run on connected device/emulator
 ```
 
 ### AI Service (FastAPI)
@@ -67,11 +60,23 @@ Core tables: `users`, `donors`, `facilities`, `staff`, `blood_requests`, `appoin
 
 Row-level security (RLS) is enabled — see `supabase/migrations/002_rls_policies.sql` before writing queries or new tables.
 
-### Dashboard Stack
-React Router 7 for routing, Tailwind CSS for styling, Recharts for data visualization, Supabase JS client for database access.
+**RPC functions:**
+- `delete_cancelled_appointments()` — SECURITY DEFINER function for staff/admin to delete cancelled appointments (bypasses RLS).
 
-### Mobile Stack (Expo)
-Expo Router (file-based routing), React Context for state management, `@supabase/supabase-js` for auth/data, `react-native-maps` for mapping, `react-native-qrcode-svg` for appointment tickets. Auth uses email-password (phone as fake email). Data flows through `AppContext.tsx` which loads profile, appointments, donations, and notifications from Supabase on login.
+### Dashboard Stack
+React Router 7 for routing, Tailwind CSS for styling, Recharts for data visualization, Supabase JS client for database access. Auth via `supabase.auth.signInWithPassword()` on Login page.
+
+### Mobile Stack (Expo — `mobile/`)
+Expo Router (file-based routing), React Context for state management, `@supabase/supabase-js` for auth/data, `react-native-maps` for mapping, `react-native-qrcode-svg` for appointment tickets, `expo-linear-gradient` for glassmorphism card effects. Auth uses email-password (phone as fake email). Data flows through `AppContext.tsx` which loads profile, appointments, donations, and notifications from Supabase on login.
+
+## Internationalization (i18n)
+
+Both dashboard and mobile support English and Arabic with RTL layout:
+- **Dashboard**: `dashboard/src/context/LanguageContext.tsx` — uses `localStorage`, sets `document.documentElement.dir`
+- **Mobile**: `mobile-expo/context/LanguageContext.tsx` — uses `AsyncStorage`
+- Translation pattern: `Record<string, Record<'en' | 'ar', string>>` dictionary with `t(key)` helper
+- All UI strings must use `t()` calls — never hardcode English/Arabic text
+- Exceptions: blood types (`A+`, `O-`, etc.), dates, and numbers stay as-is
 
 ## Environment
-Dashboard requires `.env` with Supabase credentials — copy from `dashboard/.env.example`. The Supabase project ref is `llmsozcbogckiwpazvkv` (used in MCP config at `.mcp.json`).
+Dashboard requires `.env` with Supabase credentials — copy from `dashboard/.env.example`. The Supabase project ref is `llmsozcbogckiwpazvkv`.
