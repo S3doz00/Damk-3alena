@@ -32,8 +32,17 @@ export default function Login() {
       <div className="fixed -bottom-32 -left-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed -top-32 -right-32 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
 
+      {/* Back to landing */}
+      <button
+        onClick={() => navigate('/about')}
+        className="fixed top-4 ltr:left-4 rtl:right-4 flex items-center gap-1.5 bg-surface-container-low rounded-xl px-3 py-1.5 border border-outline/10 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all cursor-pointer"
+      >
+        <span className="material-symbols-outlined rtl:rotate-180" style={{ fontSize: '16px' }}>arrow_back</span>
+        <span className="text-xs font-bold">{t('backToHome')}</span>
+      </button>
+
       {/* Language toggle */}
-      <div className="fixed top-4 right-4 flex items-center gap-1 bg-surface-container-low rounded-xl p-1 border border-outline/10">
+      <div className="fixed top-4 ltr:right-4 rtl:left-4 flex items-center gap-1 bg-surface-container-low rounded-xl p-1 border border-outline/10">
         {(['en', 'ar'] as const).map(l => (
           <button
             key={l}

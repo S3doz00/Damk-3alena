@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemeMode } from '../context/ThemeContext'
@@ -26,20 +27,45 @@ export default function Layout() {
   const navigate = useNavigate()
   const { themeMode, setThemeMode } = useTheme()
   const { lang, setLang, t } = useLanguage()
+  const [collapsed, setCollapsed] = useState(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true'
+  })
+
+  const toggleSidebar = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    localStorage.setItem('sidebarCollapsed', String(next))
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     navigate('/login')
   }
 
+  const isRTL = lang === 'ar'
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className="w-60 flex-shrink-0 bg-surface border-r border-outline flex flex-col">
+      <aside className={`relative flex-shrink-0 bg-surface border-r border-outline flex flex-col transition-all duration-300 overflow-hidden ${collapsed ? 'w-16' : 'w-60'}`}>
+
+        {/* Toggle button */}
+        <button
+          onClick={toggleSidebar}
+          title={collapsed ? t('expandSidebar') : t('collapseSidebar')}
+          className="absolute -end-3 top-7 z-50 w-6 h-6 rounded-full bg-surface-container border border-outline flex items-center justify-center hover:bg-surface-container-high transition-all cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '14px' }}>
+            {collapsed
+              ? (isRTL ? 'chevron_left' : 'chevron_right')
+              : (isRTL ? 'chevron_right' : 'chevron_left')
+            }
+          </span>
+        </button>
 
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-outline">
-          <div className="flex items-center gap-3">
+        <div className={`py-5 border-b border-outline ${collapsed ? 'px-3' : 'px-5'}`}>
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div
               className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
@@ -51,116 +77,162 @@ export default function Layout() {
                 water_drop
               </span>
             </div>
-            <div>
-              <h1 className="font-headline font-bold text-base text-on-surface tracking-tight leading-tight">
-                Damk 3alena
-              </h1>
-              <p className="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest">
-                Blood Dashboard
-              </p>
-            </div>
+            {!collapsed && (
+              <div>
+                <h1 className="font-headline font-bold text-base text-on-surface tracking-tight leading-tight whitespace-nowrap">
+                  Damk 3alena
+                </h1>
+                <p className="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                  Blood Dashboard
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <nav className={`flex-1 py-4 space-y-0.5 ${collapsed ? 'px-1.5' : 'px-3'}`}>
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/'}
+              title={collapsed ? t(item.labelKey) : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer border-l-2 ${
+                `flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${collapsed ? '' : 'border-l-2'} ${
                   isActive
-                    ? 'bg-primary/10 text-primary border-primary'
-                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface border-transparent'
+                    ? `bg-primary/10 text-primary ${collapsed ? '' : 'border-primary'}`
+                    : `text-on-surface-variant hover:bg-surface-container hover:text-on-surface ${collapsed ? '' : 'border-transparent'}`
                 }`
               }
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{item.icon}</span>
-              {t(item.labelKey)}
+              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px' }}>{item.icon}</span>
+              {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
             </NavLink>
           ))}
 
-          <div className="pt-5 pb-1.5 px-3">
-            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">
-              {t('adminLabel')}
-            </p>
-          </div>
+          {!collapsed && (
+            <div className="pt-5 pb-1.5 px-3">
+              <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">
+                {t('adminLabel')}
+              </p>
+            </div>
+          )}
+          {collapsed && <div className="pt-3" />}
 
           {ADMIN_ITEMS.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
+              title={collapsed ? t(item.labelKey) : undefined}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer border-l-2 ${
+                `flex items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer ${collapsed ? '' : 'border-l-2'} ${
                   isActive
-                    ? 'bg-secondary/10 text-secondary border-secondary'
-                    : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface border-transparent'
+                    ? `bg-secondary/10 text-secondary ${collapsed ? '' : 'border-secondary'}`
+                    : `text-on-surface-variant hover:bg-surface-container hover:text-on-surface ${collapsed ? '' : 'border-transparent'}`
                 }`
               }
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>{item.icon}</span>
-              {t(item.labelKey)}
+              <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px' }}>{item.icon}</span>
+              {!collapsed && <span className="whitespace-nowrap">{t(item.labelKey)}</span>}
             </NavLink>
           ))}
         </nav>
 
         {/* Language Switcher */}
-        <div className="px-3 py-3 border-t border-outline">
-          <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2 mb-2">
-            {t('language')}
-          </p>
-          <div className="flex gap-1 p-1 bg-surface-container rounded-xl">
+        {!collapsed ? (
+          <div className="px-3 py-3 border-t border-outline">
+            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2 mb-2">
+              {t('language')}
+            </p>
+            <div className="flex gap-1 p-1 bg-surface-container rounded-xl">
+              {(['en', 'ar'] as const).map(l => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                    lang === l
+                      ? 'bg-surface text-on-surface shadow-sm'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  <span className="text-base">{l === 'en' ? '🇺🇸' : '🇸🇦'}</span>
+                  <span>{l === 'en' ? 'EN' : 'AR'}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="px-1.5 py-3 border-t border-outline flex flex-col items-center gap-1">
             {(['en', 'ar'] as const).map(l => (
               <button
                 key={l}
                 onClick={() => setLang(l)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                title={l === 'en' ? 'English' : 'العربية'}
+                className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm transition-all duration-150 cursor-pointer ${
                   lang === l
-                    ? 'bg-surface text-on-surface shadow-sm'
-                    : 'text-on-surface-variant hover:text-on-surface'
+                    ? 'bg-primary/10 text-on-surface'
+                    : 'text-on-surface-variant hover:bg-surface-container'
                 }`}
               >
-                <span className="text-base">{l === 'en' ? '🇺🇸' : '🇸🇦'}</span>
-                <span>{l === 'en' ? 'EN' : 'AR'}</span>
+                {l === 'en' ? '🇺🇸' : '🇸🇦'}
               </button>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Theme Toggle */}
-        <div className="px-3 py-3 border-t border-outline">
-          <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2 mb-2">
-            {t('appearance')}
-          </p>
-          <div className="flex gap-1">
+        {!collapsed ? (
+          <div className="px-3 py-3 border-t border-outline">
+            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest px-2 mb-2">
+              {t('appearance')}
+            </p>
+            <div className="flex gap-1">
+              {THEME_OPTIONS.map(opt => (
+                <button
+                  key={opt.mode}
+                  onClick={() => setThemeMode(opt.mode)}
+                  title={t(opt.labelKey)}
+                  className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+                    themeMode === opt.mode
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                  }`}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{opt.icon}</span>
+                  <span className="text-[10px]">{t(opt.labelKey)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="px-1.5 py-3 border-t border-outline flex flex-col items-center gap-1">
             {THEME_OPTIONS.map(opt => (
               <button
                 key={opt.mode}
                 onClick={() => setThemeMode(opt.mode)}
                 title={t(opt.labelKey)}
-                className={`flex-1 flex flex-col items-center gap-0.5 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
+                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer ${
                   themeMode === opt.mode
                     ? 'bg-primary/10 text-primary'
                     : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 }`}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>{opt.icon}</span>
-                <span className="text-[10px]">{t(opt.labelKey)}</span>
               </button>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Sign Out */}
-        <div className="px-3 py-3 border-t border-outline">
+        <div className={`py-3 border-t border-outline ${collapsed ? 'px-1.5' : 'px-3'}`}>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-error/10 hover:text-error transition-all duration-150 w-full cursor-pointer border-l-2 border-transparent"
+            title={collapsed ? t('signOut') : undefined}
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3 border-l-2 border-transparent'} py-2.5 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-error/10 hover:text-error transition-all duration-150 w-full cursor-pointer`}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
-            {t('signOut')}
+            <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '18px' }}>logout</span>
+            {!collapsed && t('signOut')}
           </button>
         </div>
       </aside>

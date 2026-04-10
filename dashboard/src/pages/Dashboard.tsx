@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -17,29 +17,50 @@ const BLOOD_TYPE_COLORS: Record<string, string> = {
 
 const ALL_BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']
 
+const weekLabel = (weeksAgo: number) => {
+  const d = new Date()
+  d.setDate(d.getDate() - weeksAgo * 7)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 const glass = {
   background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
   backdropFilter: 'blur(12px)',
   WebkitBackdropFilter: 'blur(12px)',
 }
 
+interface RawRequest {
+  id: string
+  blood_type: string
+  status: string
+}
+
+interface RawAppointment {
+  id: string
+  donors: { blood_type: string } | null
+}
+
+interface RawDonor {
+  id: string
+  blood_type: string
+}
+
 export default function Dashboard() {
   const { t } = useLanguage()
-  const [stats, setStats] = useState({
-    totalRequests: 0,
-    openRequests: 0,
-    todayAppointments: 0,
-    totalDonors: 0,
-  })
-  const [weeklyBookings, setWeeklyBookings] = useState<{ day: string; bookings: number }[]>([])
-  const [inventory, setInventory] = useState<{ blood_type: string; units: number }[]>([])
   const [loading, setLoading] = useState(true)
+  const [inventory, setInventory] = useState<{ blood_type: string; units: number }[]>([])
+  const [weeklyBookings, setWeeklyBookings] = useState<{ day: string; bookings: number }[]>([])
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
+  // Raw data for filtering
+  const [rawRequests, setRawRequests] = useState<RawRequest[]>([])
+  const [rawAppointments, setRawAppointments] = useState<RawAppointment[]>([])
+  const [rawDonors, setRawDonors] = useState<RawDonor[]>([])
 
-  async function loadDashboardData() {
+  // Interactive state
+  const [selectedBloodType, setSelectedBloodType] = useState<string | null>(null)
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
+  const loadDashboardData = useCallback(async () => {
     const today = new Date().toISOString().split('T')[0]
 
     // Resolve current user's facility
@@ -59,20 +80,16 @@ export default function Dashboard() {
       ? supabase.from('facility_inventory').select('blood_type, units').eq('facility_id', facilityId)
       : supabase.from('facility_inventory').select('blood_type, units').limit(8)
 
-    const [openRes, totalRes, todayRes, inventoryRes, donorsRes] = await Promise.all([
-      supabase.from('blood_requests').select('*', { count: 'exact', head: true }).in('status', ['open', 'in_progress']),
-      supabase.from('blood_requests').select('*', { count: 'exact', head: true }),
-      supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('appointment_date', today).eq('status', 'booked'),
+    const [requestsRes, todayApptsRes, inventoryRes, donorsRes] = await Promise.all([
+      supabase.from('blood_requests').select('id, blood_type, status'),
+      supabase.from('appointments').select('id, donors(blood_type)').eq('appointment_date', today).eq('status', 'booked'),
       inventoryQuery,
-      supabase.from('donors').select('*', { count: 'exact', head: true }),
+      supabase.from('donors').select('id, blood_type'),
     ])
 
-    setStats({
-      totalRequests: totalRes.count || 0,
-      openRequests: openRes.count || 0,
-      todayAppointments: todayRes.count || 0,
-      totalDonors: donorsRes.count || 0,
-    })
+    if (requestsRes.data) setRawRequests(requestsRes.data as RawRequest[])
+    if (todayApptsRes.data) setRawAppointments(todayApptsRes.data as unknown as RawAppointment[])
+    if (donorsRes.data) setRawDonors(donorsRes.data as RawDonor[])
 
     if (inventoryRes.data && inventoryRes.data.length > 0) {
       setInventory(inventoryRes.data)
@@ -88,10 +105,56 @@ export default function Dashboard() {
     ])
 
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
 
   const maxInventory = inventory.length > 0 ? Math.max(...inventory.map(i => i.units)) : 50
-  const maxBookings = weeklyBookings.length > 0 ? Math.max(...weeklyBookings.map(d => d.bookings)) : 1
+
+  // Proportional scale factor derived from donor share of the selected blood type
+  const bloodTypeShare = useMemo(() => {
+    if (!selectedBloodType || rawDonors.length === 0) return 1
+    const matching = rawDonors.filter(d => d.blood_type === selectedBloodType).length
+    return matching / rawDonors.length
+  }, [selectedBloodType, rawDonors])
+
+  // Proportional scale factor derived from the selected day of the week
+  const dayShare = useMemo(() => {
+    if (!selectedDay || weeklyBookings.length === 0) return 1
+    const total = weeklyBookings.reduce((s, d) => s + d.bookings, 0)
+    if (total === 0) return 1
+    const day = weeklyBookings.find(d => d.day === selectedDay)
+    return day ? day.bookings / total : 1
+  }, [selectedDay, weeklyBookings])
+
+  // Combined scale — both filters multiply
+  const combinedShare = bloodTypeShare * dayShare
+
+  // Weekly bookings filtered by selected blood type (proportional scaling)
+  const filteredWeeklyBookings = useMemo(
+    () => weeklyBookings.map(w => ({
+      ...w,
+      bookings: Math.round(w.bookings * bloodTypeShare),
+    })),
+    [weeklyBookings, bloodTypeShare],
+  )
+
+  // Filtered stats (blood type filters the set, day scales proportionally)
+  const stats = useMemo(() => {
+    const bt = selectedBloodType
+    const filteredRequests = bt ? rawRequests.filter(r => r.blood_type === bt) : rawRequests
+    const filteredAppts = bt ? rawAppointments.filter(a => a.donors?.blood_type === bt) : rawAppointments
+    const filteredDonors = bt ? rawDonors.filter(d => d.blood_type === bt) : rawDonors
+
+    return {
+      openRequests: Math.round(filteredRequests.filter(r => ['open', 'in_progress'].includes(r.status)).length * dayShare),
+      totalRequests: Math.round(filteredRequests.length * dayShare),
+      todayAppointments: Math.round(filteredAppts.length * dayShare),
+      totalDonors: Math.round(filteredDonors.length * dayShare),
+    }
+  }, [selectedBloodType, rawRequests, rawAppointments, rawDonors, dayShare])
 
   const dateStr = new Date().toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -112,17 +175,29 @@ export default function Dashboard() {
   }))
 
   // Simulated weekly trend data for area chart (last 4 weeks)
-  const weekLabel = (weeksAgo: number) => {
-    const d = new Date()
-    d.setDate(d.getDate() - weeksAgo * 7)
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const trendData = useMemo(() => {
+    const base = [
+      { week: weekLabel(3), donations: 38, requests: 22, fulfilled: 20 },
+      { week: weekLabel(2), donations: 42, requests: 18, fulfilled: 17 },
+      { week: weekLabel(1), donations: 35, requests: 25, fulfilled: 22 },
+      {
+        week: 'Now',
+        donations: weeklyBookings.reduce((s, d) => s + d.bookings, 0),
+        requests: stats.totalRequests,
+        fulfilled: stats.totalRequests - stats.openRequests,
+      },
+    ]
+    return base.map(row => ({
+      ...row,
+      donations: Math.round(row.donations * combinedShare),
+      requests: Math.round(row.requests * combinedShare),
+      fulfilled: Math.round(row.fulfilled * combinedShare),
+    }))
+  }, [weeklyBookings, stats.totalRequests, stats.openRequests, combinedShare])
+
+  const toggleBloodType = (bt: string) => {
+    setSelectedBloodType(prev => prev === bt ? null : bt)
   }
-  const trendData = [
-    { week: weekLabel(3), donations: 38, requests: 22, fulfilled: 20 },
-    { week: weekLabel(2), donations: 42, requests: 18, fulfilled: 17 },
-    { week: weekLabel(1), donations: 35, requests: 25, fulfilled: 22 },
-    { week: 'Now',        donations: weeklyBookings.reduce((s, d) => s + d.bookings, 0), requests: stats.totalRequests, fulfilled: stats.totalRequests - stats.openRequests },
-  ]
 
   return (
     <div className="space-y-8">
@@ -133,15 +208,57 @@ export default function Dashboard() {
           <h1 className="font-headline font-bold text-2xl text-on-surface">{t('dashboard')}</h1>
           <p className="text-on-surface-variant text-sm mt-0.5">{dateStr}</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-500/20"
-          style={{ background: 'rgba(13,148,136,0.08)' }}>
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ background: '#0D9488', animation: 'dot-pulse 2s ease-in-out infinite' }}
-          />
-          <span className="text-xs font-semibold" style={{ color: '#2DD4BF' }}>{t('live')}</span>
+        <div className="flex items-center gap-3">
+          {/* Refresh button */}
+          <button
+            onClick={() => { setLoading(true); loadDashboardData() }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline/20 bg-surface-container/50 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all text-xs font-medium cursor-pointer"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>refresh</span>
+            {t('refresh')}
+          </button>
+          {/* Live indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-500/20"
+            style={{ background: 'rgba(13,148,136,0.08)' }}>
+            <span
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{ background: '#0D9488', animation: 'dot-pulse 2s ease-in-out infinite' }}
+            />
+            <span className="text-xs font-semibold" style={{ color: '#2DD4BF' }}>{t('live')}</span>
+          </div>
         </div>
       </div>
+
+      {/* Active filter indicator */}
+      {(selectedBloodType || selectedDay) && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-on-surface-variant">{t('filteredBy')}</span>
+          {selectedBloodType && (
+            <button
+              onClick={() => setSelectedBloodType(null)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border cursor-pointer transition-all hover:opacity-80"
+              style={{
+                background: `${BLOOD_TYPE_COLORS[selectedBloodType]}15`,
+                borderColor: `${BLOOD_TYPE_COLORS[selectedBloodType]}30`,
+                color: BLOOD_TYPE_COLORS[selectedBloodType],
+              }}
+            >
+              {selectedBloodType}
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
+            </button>
+          )}
+          {selectedDay && (
+            <button
+              onClick={() => setSelectedDay(null)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border cursor-pointer transition-all hover:opacity-80 bg-secondary/10 border-secondary/30 text-secondary"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>calendar_month</span>
+              {selectedDay}
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>close</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -184,7 +301,17 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-headline font-bold text-base text-on-surface">{t('bloodTypeInventory')}</h2>
-          <span className="text-xs text-on-surface-variant">{t('unitsAvailable')}</span>
+          <div className="flex items-center gap-3">
+            {selectedBloodType && (
+              <button
+                onClick={() => setSelectedBloodType(null)}
+                className="text-[10px] font-semibold text-primary hover:underline cursor-pointer"
+              >
+                {t('allBloodTypes')}
+              </button>
+            )}
+            <span className="text-xs text-on-surface-variant">{t('unitsAvailable')}</span>
+          </div>
         </div>
 
         {inventory.length > 0 ? (
@@ -195,8 +322,16 @@ export default function Dashboard() {
               const color = BLOOD_TYPE_COLORS[bt]
               const pct = maxInventory > 0 ? Math.round((units / maxInventory) * 100) : 0
               const isLow = units < 10
+              const isSelected = selectedBloodType === bt
+              const isDimmed = selectedBloodType && !isSelected
               return (
-                <div key={bt} className="flex items-center gap-3">
+                <div
+                  key={bt}
+                  className={`flex items-center gap-3 cursor-pointer rounded-lg px-2 py-1.5 transition-all duration-200 ${
+                    isSelected ? 'ring-1 ring-primary/30 bg-primary/5' : 'hover:bg-surface-container'
+                  } ${isDimmed ? 'opacity-30' : ''}`}
+                  onClick={() => toggleBloodType(bt)}
+                >
                   <span className="font-mono font-bold text-xs w-8 text-right flex-shrink-0" style={{ color }}>
                     {bt}
                   </span>
@@ -236,9 +371,22 @@ export default function Dashboard() {
         className="glass-card rounded-2xl p-6 border border-outline relative overflow-hidden"
         style={glass}
       >
-        <h2 className="font-headline font-bold text-base text-on-surface mb-5">{t('weeklyBookings')}</h2>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-headline font-bold text-base text-on-surface">{t('weeklyBookings')}</h2>
+          {selectedBloodType && (
+            <span
+              className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
+              style={{
+                color: BLOOD_TYPE_COLORS[selectedBloodType],
+                background: `${BLOOD_TYPE_COLORS[selectedBloodType]}15`,
+              }}
+            >
+              {selectedBloodType}
+            </span>
+          )}
+        </div>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={weeklyBookings} barSize={36} barCategoryGap="30%">
+          <BarChart data={filteredWeeklyBookings} barSize={36} barCategoryGap="30%">
             <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} />
             <YAxis tick={{ fontSize: 12, fill: '#64748B' }} axisLine={false} tickLine={false} width={28} />
             <Tooltip
@@ -251,21 +399,44 @@ export default function Dashboard() {
                 color: 'var(--color-on-surface)',
               }}
               labelStyle={{ color: 'var(--color-on-surface)', fontWeight: 600 }}
-              itemStyle={{ color: '#E11D48' }}
+              itemStyle={{ color: selectedBloodType ? BLOOD_TYPE_COLORS[selectedBloodType] : '#E11D48' }}
               cursor={{ fill: 'var(--color-outline-variant)', radius: 6 }}
             />
-            <Bar dataKey="bookings" radius={[6, 6, 0, 0]}>
-              {weeklyBookings.map((entry, index) => (
-                <Cell
-                  key={index}
-                  fill={entry.bookings === maxBookings ? '#E11D48' : 'var(--color-surface-container-high)'}
-                  stroke={entry.bookings === maxBookings ? 'rgba(225,29,72,0.4)' : 'var(--color-outline)'}
-                  strokeWidth={1}
-                />
-              ))}
+            <Bar
+              dataKey="bookings"
+              radius={[6, 6, 0, 0]}
+              onClick={(_data: unknown, index: number) => {
+                const day = filteredWeeklyBookings[index]?.day
+                if (day) setSelectedDay(prev => prev === day ? null : day)
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              {filteredWeeklyBookings.map((entry, index) => {
+                const isDaySelected = selectedDay === entry.day
+                const activeColor = selectedBloodType ? BLOOD_TYPE_COLORS[selectedBloodType] : '#E11D48'
+                return (
+                  <Cell
+                    key={index}
+                    fill={isDaySelected ? activeColor : 'var(--color-surface-container-high)'}
+                    stroke={isDaySelected ? `${activeColor}99` : 'var(--color-outline)'}
+                    strokeWidth={isDaySelected ? 2 : 1}
+                  />
+                )
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        {selectedDay && (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-xs text-on-surface-variant">{selectedDay}:</span>
+            <span className="text-xs font-bold text-on-surface">
+              {filteredWeeklyBookings.find(d => d.day === selectedDay)?.bookings ?? 0} {t('bookings')}
+            </span>
+            <button onClick={() => setSelectedDay(null)} className="text-xs text-primary hover:underline cursor-pointer ml-auto">
+              {t('clearFilter')}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Activity Trend — Area Chart */}
@@ -274,9 +445,27 @@ export default function Dashboard() {
         style={glass}
       >
         <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="font-headline font-bold text-base text-on-surface">{t('activityTrend')}</h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">{t('activityTrendDesc')}</p>
+          <div className="flex items-center gap-2">
+            <div>
+              <h2 className="font-headline font-bold text-base text-on-surface">{t('activityTrend')}</h2>
+              <p className="text-xs text-on-surface-variant mt-0.5">{t('activityTrendDesc')}</p>
+            </div>
+            {selectedBloodType && (
+              <span
+                className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ml-2"
+                style={{
+                  color: BLOOD_TYPE_COLORS[selectedBloodType],
+                  background: `${BLOOD_TYPE_COLORS[selectedBloodType]}15`,
+                }}
+              >
+                {selectedBloodType}
+              </span>
+            )}
+            {selectedDay && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full ml-1 bg-secondary/10 text-secondary">
+                {selectedDay}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-4 text-[11px] text-on-surface-variant">
             {[
@@ -348,10 +537,23 @@ export default function Dashboard() {
                 dataKey="value"
                 animationBegin={0}
                 animationDuration={800}
+                onClick={(data) => {
+                  if (data?.name) toggleBloodType(data.name)
+                }}
+                style={{ cursor: 'pointer' }}
               >
-                {donutData.map((entry, index) => (
-                  <Cell key={index} fill={entry.fill} stroke="none" />
-                ))}
+                {donutData.map((entry, index) => {
+                  const isDimmed = selectedBloodType && selectedBloodType !== entry.name
+                  return (
+                    <Cell
+                      key={index}
+                      fill={entry.fill}
+                      stroke={selectedBloodType === entry.name ? entry.fill : 'none'}
+                      strokeWidth={selectedBloodType === entry.name ? 3 : 0}
+                      opacity={isDimmed ? 0.25 : 1}
+                    />
+                  )
+                })}
               </Pie>
               <Tooltip
                 contentStyle={{

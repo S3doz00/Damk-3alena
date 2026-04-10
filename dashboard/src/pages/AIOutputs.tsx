@@ -303,13 +303,13 @@ export default function AIOutputs() {
                         />
                       </div>
                       <span className="font-mono text-[11px] text-on-surface-variant flex-shrink-0">
-                        {rec.score} pts
+                        {rec.score} {t('pts')}
                       </span>
                     </div>
                   </div>
 
                   <div className="text-right flex-shrink-0">
-                    <p className="font-mono text-xs text-on-surface-variant">{rec.distance_km} km</p>
+                    <p className="font-mono text-xs text-on-surface-variant">{rec.distance_km} {t('km')}</p>
                   </div>
                 </div>
               )

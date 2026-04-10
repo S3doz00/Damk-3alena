@@ -206,6 +206,24 @@ const translations: Record<string, Record<Lang, string>> = {
   critical:           { en: 'Critical',   ar: 'حرج' },
   warning:            { en: 'Warning',    ar: 'تحذير' },
   requStatus_closed:  { en: 'closed',     ar: 'مغلق' },
+
+  // AI Insights units
+  pts:                { en: 'pts',       ar: 'نقطة' },
+  km:                 { en: 'km',        ar: 'كم' },
+
+  // Login
+  backToHome:         { en: 'Back',      ar: 'رجوع' },
+
+  // Sidebar
+  collapseSidebar:    { en: 'Collapse sidebar', ar: 'طي الشريط الجانبي' },
+  expandSidebar:      { en: 'Expand sidebar',   ar: 'توسيع الشريط الجانبي' },
+
+  // Dashboard filtering
+  filteredBy:         { en: 'Filtered by',    ar: 'تصفية حسب' },
+  refresh:            { en: 'Refresh',        ar: 'تحديث' },
+  clearFilter:        { en: 'Clear filter',   ar: 'مسح التصفية' },
+  allBloodTypes:      { en: 'All blood types', ar: 'جميع فصائل الدم' },
+  bookings:           { en: 'bookings',       ar: 'حجز' },
 }
 
 const LanguageContext = createContext<LanguageContextValue>({

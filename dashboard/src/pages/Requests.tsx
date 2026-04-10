@@ -50,26 +50,17 @@ export default function Requests() {
   }
 
   async function clearClosed() {
-    const closedIds = requests.filter(r => r.status === 'closed').map(r => r.id)
-    if (closedIds.length === 0) return
+    const closedCount = requests.filter(r => r.status === 'closed').length
+    if (closedCount === 0) return
     setClearing(true)
     // Optimistic update
     setRequests(prev => prev.filter(r => r.status !== 'closed'))
-    try {
-      const { error } = await supabase
-        .from('blood_requests')
-        .delete()
-        .in('id', closedIds)
-      if (error) {
-        console.error('Clear closed failed:', error.message)
-        await loadRequests()
-      }
-    } catch (e) {
-      console.error('Clear closed exception:', e)
-      await loadRequests()
-    } finally {
-      setClearing(false)
+    // RPC is SECURITY DEFINER — bypasses RLS. Trust it.
+    const { error } = await supabase.rpc('delete_closed_requests')
+    if (error) {
+      console.error('Clear closed failed:', error.message)
     }
+    setClearing(false)
   }
 
   const urgencyColors: Record<string, string> = {
@@ -102,7 +93,7 @@ export default function Requests() {
           <button
             onClick={clearClosed}
             disabled={clearing}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-outline/10 hover:bg-outline/20 text-outline text-sm font-semibold transition-all duration-150 border border-outline/20 cursor-pointer disabled:opacity-50 flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-error/10 hover:bg-error/20 text-error text-sm font-semibold transition-all duration-150 border border-error/20 cursor-pointer disabled:opacity-50 flex-shrink-0"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete_sweep</span>
             {clearing ? t('clearing') : `${t('clearClosedBtn')} (${closedCount})`}

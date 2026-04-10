@@ -10,6 +10,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `ai-service/` — FastAPI Python microservice for ML predictions
 - `supabase/` — PostgreSQL schema, migrations, and RLS policies
 
+## Deployment Reminder
+
+After making any changes, push to GitHub to trigger an automatic Vercel redeploy:
+```bash
+git add .
+git commit -m "describe your change"
+git push
+```
+
 ## Commands
 
 ### Dashboard (React/Vite)
@@ -79,4 +88,4 @@ Both dashboard and mobile support English and Arabic with RTL layout:
 - Exceptions: blood types (`A+`, `O-`, etc.), dates, and numbers stay as-is
 
 ## Environment
-Dashboard requires `.env` with Supabase credentials — copy from `dashboard/.env.example`. The Supabase project ref is `llmsozcbogckiwpazvkv`.
+Dashboard requires `.env` with Supabase credentials — copy from `dashboard/.env.example`. The active Supabase project ref is `fyushkwhotqyihzuekhr` (name: "Antigravity trial", region: ap-southeast-2) — this is what `dashboard/.env` and the mobile app both point to. An older project `llmsozcbogckiwpazvkv` exists in the same org but is **not** in use — do not run migrations or create RPCs there.

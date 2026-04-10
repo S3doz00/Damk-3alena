@@ -52,32 +52,17 @@ export default function Appointments() {
   }
 
   async function clearCancelled() {
-    const cancelledIds = appointments.filter(a => a.status === 'cancelled').map(a => a.id)
-    if (cancelledIds.length === 0) return
+    const cancelledCount = appointments.filter(a => a.status === 'cancelled').length
+    if (cancelledCount === 0) return
     setClearing(true)
     // Optimistic update — remove from UI immediately
     setAppointments(prev => prev.filter(a => a.status !== 'cancelled'))
-    try {
-      // Try RPC first (SECURITY DEFINER bypasses RLS)
-      const { error: rpcError } = await supabase.rpc('delete_cancelled_appointments')
-      if (rpcError) {
-        // Fallback: direct delete by IDs
-        const { error: deleteError } = await supabase
-          .from('appointments')
-          .delete()
-          .in('id', cancelledIds)
-        if (deleteError) {
-          console.error('Clear cancelled failed:', deleteError.message)
-          // Restore UI by reloading
-          await loadAppointments()
-        }
-      }
-    } catch (e) {
-      console.error('Clear cancelled exception:', e)
-      await loadAppointments()
-    } finally {
-      setClearing(false)
+    // RPC is SECURITY DEFINER — bypasses RLS. Trust it.
+    const { error } = await supabase.rpc('delete_cancelled_appointments')
+    if (error) {
+      console.error('Clear cancelled failed:', error.message)
     }
+    setClearing(false)
   }
 
   const sorted = [...appointments].sort((a, b) => {
