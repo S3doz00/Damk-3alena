@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import About from './pages/About'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -75,6 +76,7 @@ function App() {
           <Route path="admin/settings" element={<SystemSettings />} />
         </Route>
       </Routes>
+      <SpeedInsights />
     </BrowserRouter>
     </LanguageProvider>
     </ThemeProvider>
