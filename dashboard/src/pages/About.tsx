@@ -175,9 +175,10 @@ export default function About() {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
 
   const TEAM = [
-    { name: 'Saad Abulehyah', role: 'Team Lead & Full-Stack', icon: 'code' },
-    { name: 'AI Engine', role: 'ML Forecasting & Matching', icon: 'smart_toy' },
-    { name: 'Supabase', role: 'Backend & Realtime', icon: 'database' },
+    { name: 'Saad Abulihyeh', role: 'Team Lead & Full-Stack Developer', icon: 'code' },
+    { name: 'Sondos Abulihyeh', role: 'UI/UX Designer & Frontend Developer', icon: 'palette' },
+    { name: 'Raghad Al-Basha', role: 'Backend Developer & Data Analyst', icon: 'database' },
+    { name: 'Rawan Daoud', role: 'QA & Documentation Lead', icon: 'verified' },
   ]
 
   const FEATURES = [
@@ -413,13 +414,13 @@ export default function About() {
 
       {/* ── Team / Tech Section ── */}
       <RevealSection className="relative z-10 px-6 md:px-12 pb-24" delay={0}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-headline font-extrabold text-3xl md:text-4xl tracking-tight mb-3">
               {t('poweredBy')} <span className="about-gradient-text">{t('poweredBy2')}</span>
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
             {TEAM.map((tm, i) => (
               <TeamCard key={tm.name} tm={tm} index={i} />
             ))}

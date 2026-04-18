@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLanguage } from '../context/LanguageContext'
+import { InfoPopover } from '@/components/ui/info-popover'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts'
 
 interface ForecastResult {
@@ -19,6 +20,9 @@ interface ShortageAlert {
   predicted_units: number
   message: string
   is_active: boolean
+  facility_id: string
+  created_at: string
+  facilities?: { name: string }
 }
 
 interface DonorRecommendation {
@@ -60,7 +64,7 @@ export default function AIOutputs() {
         .limit(40),
       supabase
         .from('shortage_alerts')
-        .select('*')
+        .select('*, facilities(name)')
         .eq('is_active', true)
         .order('created_at', { ascending: false }),
       supabase
@@ -83,8 +87,13 @@ export default function AIOutputs() {
     const existing = acc.find(row => row.week === f.forecast_week)
     if (existing) {
       existing[f.blood_type] = f.predicted_units
+      existing[`${f.blood_type}_conf`] = f.confidence
     } else {
-      acc.push({ week: f.forecast_week, [f.blood_type]: f.predicted_units } as Record<string, number | string>)
+      acc.push({
+        week: f.forecast_week,
+        [f.blood_type]: f.predicted_units,
+        [`${f.blood_type}_conf`]: f.confidence,
+      } as Record<string, number | string>)
     }
     return acc
   }, [])
@@ -93,6 +102,13 @@ export default function AIOutputs() {
   const criticalAlerts = alerts.filter(a => a.severity === 'critical')
   const warningAlerts = alerts.filter(a => a.severity === 'warning')
   const maxScore = recommendations[0]?.score || 100
+
+  // Average forecast confidence — DB stores confidence as 0..1 fraction, multiply by 100 for %
+  const avgConfidence = forecasts.length > 0
+    ? Math.round((forecasts.reduce((s, f) => s + (f.confidence || 0), 0) / forecasts.length) * 100)
+    : 0
+  const confidenceLabel = avgConfidence >= 80 ? t('dataQualityHigh') : avgConfidence >= 50 ? t('dataQualityMedium') : t('dataQualityLow')
+  const confidenceColor = avgConfidence >= 80 ? '#10B981' : avgConfidence >= 50 ? '#F59E0B' : '#EF4444'
 
   if (loading) {
     return (
@@ -132,22 +148,59 @@ export default function AIOutputs() {
               </span>
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <p className="font-semibold text-error text-sm">{t('criticalShortageDetected')}</p>
                 <span className="text-[10px] font-bold text-error/60 bg-error/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
                   {criticalAlerts.length} {t('severity')}{criticalAlerts.length > 1 ? 's' : ''}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {criticalAlerts.map(a => (
-                  <div
-                    key={a.id}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-error/10 border border-error/20"
-                  >
-                    <span className="font-mono font-bold text-sm text-error">{a.blood_type}</span>
-                    <span className="text-xs text-error/60">{a.current_units} {t('unitsLeft')}</span>
-                  </div>
-                ))}
+              <p className="text-xs text-error/80 mb-3 leading-relaxed max-w-xl">{t('criticalExplain')}</p>
+              <div className="space-y-2">
+                {criticalAlerts.map(a => {
+                  const shortfall = Math.max(0, (a.predicted_units || 0) - (a.current_units || 0))
+                  return (
+                    <div
+                      key={a.id}
+                      className="px-4 py-3 rounded-xl bg-error/10 border border-error/20"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-sm text-error">{a.blood_type}</span>
+                          {a.facilities?.name && (
+                            <span className="text-xs text-error/70">@ {a.facilities.name}</span>
+                          )}
+                        </div>
+                        {a.created_at && (
+                          <span className="text-[10px] text-error/50">
+                            {new Date(a.created_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="rounded-lg bg-error/5 px-2 py-1.5">
+                          <p className="text-[10px] uppercase tracking-wider text-error/60">{t('currentStock')}</p>
+                          <p className="font-bold text-error mt-0.5">{a.current_units} {t('units')}</p>
+                        </div>
+                        {a.predicted_units > 0 && (
+                          <div className="rounded-lg bg-error/5 px-2 py-1.5">
+                            <p className="text-[10px] uppercase tracking-wider text-error/60">{t('predictedDemand')}</p>
+                            <p className="font-bold text-error mt-0.5">{a.predicted_units} {t('units')}</p>
+                          </div>
+                        )}
+                        {shortfall > 0 && (
+                          <div className="rounded-lg bg-error/15 px-2 py-1.5 border border-error/30">
+                            <p className="text-[10px] uppercase tracking-wider text-error/70">{t('shortfall')}</p>
+                            <p className="font-bold text-error mt-0.5">{shortfall} {t('units')}</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2.5 text-xs text-error/80">
+                        <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>tips_and_updates</span>
+                        <span className="font-medium">{t('urgentDonorOutreach')}</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
@@ -157,27 +210,68 @@ export default function AIOutputs() {
       {/* Warning Alerts */}
       {warningAlerts.length > 0 && (
         <div className="space-y-3">
-          <p className="text-[10px] font-bold text-secondary uppercase tracking-widest">{t('supplyWarnings')}</p>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[10px] font-bold text-secondary uppercase tracking-widest">{t('supplyWarnings')}</p>
+              <InfoPopover icon="help_outline" side="bottom">
+                <h4 className="font-headline font-bold text-sm mb-1.5">{t('explainShortageTitle')}</h4>
+                <p className="text-xs text-on-surface-variant leading-relaxed">{t('explainShortageBody')}</p>
+              </InfoPopover>
+            </div>
+            <p className="text-xs text-on-surface-variant mt-1 max-w-xl leading-relaxed">{t('warningExplain')}</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {warningAlerts.map(alert => (
-              <div
-                key={alert.id}
-                className="flex items-center gap-3 p-4 rounded-xl bg-secondary/5 border border-secondary/15"
-              >
+            {warningAlerts.map(alert => {
+              const shortfall = Math.max(0, (alert.predicted_units || 0) - (alert.current_units || 0))
+              return (
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(245,158,11,0.12)' }}
+                  key={alert.id}
+                  className="p-4 rounded-xl bg-secondary/5 border border-secondary/15"
                 >
-                  <span className="font-mono font-bold text-sm text-secondary">{alert.blood_type}</span>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: 'rgba(245,158,11,0.12)' }}
+                    >
+                      <span className="font-mono font-bold text-sm text-secondary">{alert.blood_type}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {alert.facilities?.name && (
+                        <p className="text-sm font-semibold text-on-surface truncate">{alert.facilities.name}</p>
+                      )}
+                      <p className="text-[11px] text-on-surface-variant mt-0.5">{alert.blood_type}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="rounded-lg bg-surface-container-low px-2 py-1.5">
+                      <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/70">{t('statusNow')}</p>
+                      <p className="font-bold text-sm text-on-surface mt-0.5">{alert.current_units}</p>
+                      <p className="text-[10px] text-on-surface-variant">{t('units')}</p>
+                    </div>
+                    <div className="rounded-lg bg-surface-container-low px-2 py-1.5">
+                      <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/70">{t('statusNextWeek')}</p>
+                      <p className="font-bold text-sm text-secondary mt-0.5">{alert.predicted_units}</p>
+                      <p className="text-[10px] text-on-surface-variant">{t('predictedDemand')}</p>
+                    </div>
+                    <div className={`rounded-lg px-2 py-1.5 ${shortfall > 0 ? 'bg-secondary/10 border border-secondary/25' : 'bg-surface-container-low'}`}>
+                      <p className="text-[10px] uppercase tracking-wider text-on-surface-variant/70">{t('shortfall')}</p>
+                      <p className={`font-bold text-sm mt-0.5 ${shortfall > 0 ? 'text-secondary' : 'text-on-surface-variant'}`}>
+                        {shortfall > 0 ? `−${shortfall}` : '0'}
+                      </p>
+                      <p className="text-[10px] text-on-surface-variant">{t('units')}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-1.5 text-xs text-on-surface-variant">
+                    <span className="material-symbols-outlined flex-shrink-0" style={{ fontSize: '13px' }}>tips_and_updates</span>
+                    <span className="leading-snug">
+                      {shortfall > 0 ? t('suggestCampaign') : t('monitorClosely')}
+                    </span>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-on-surface leading-snug">{alert.message}</p>
-                  <p className="text-xs text-on-surface-variant mt-0.5">
-                    {alert.current_units} {t('now')} → {alert.predicted_units} {t('predicted')}
-                  </p>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -185,12 +279,29 @@ export default function AIOutputs() {
       {/* Forecast Chart */}
       <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-headline font-bold text-base text-on-surface">{t('bloodDemandForecast')}</h2>
-          {forecastChartData.length === 1 && (
-            <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
-              {t('oneWeekData')}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            <h2 className="font-headline font-bold text-base text-on-surface">{t('bloodDemandForecast')}</h2>
+            <InfoPopover icon="help_outline" side="bottom">
+              <h4 className="font-headline font-bold text-sm mb-1.5">{t('explainForecastTitle')}</h4>
+              <p className="text-xs text-on-surface-variant leading-relaxed">{t('explainForecastBody')}</p>
+            </InfoPopover>
+          </div>
+          <div className="flex items-center gap-2">
+            {forecasts.length > 0 && (
+              <span
+                className="text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
+                style={{ background: `${confidenceColor}15`, color: confidenceColor }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>analytics</span>
+                {t('dataQuality')}: {avgConfidence}% — {confidenceLabel}
+              </span>
+            )}
+            {forecastChartData.length === 1 && (
+              <span className="text-xs text-on-surface-variant bg-surface-container px-2.5 py-1 rounded-full">
+                {t('oneWeekData')}
+              </span>
+            )}
+          </div>
         </div>
         <p className="text-xs text-on-surface-variant mb-5 max-w-xl">{t('bloodDemandDesc')}</p>
 
@@ -211,15 +322,28 @@ export default function AIOutputs() {
                 width={32}
               />
               <Tooltip
-                contentStyle={{
-                  background: 'var(--color-surface-container-high)',
-                  border: '1px solid var(--color-outline)',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                  padding: '10px 14px',
-                  color: 'var(--color-on-surface)',
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null
+                  return (
+                    <div className="bg-surface-container-high border border-outline rounded-xl p-3 shadow-lg text-xs">
+                      <p className="font-semibold text-on-surface mb-2">{label}</p>
+                      {payload.map((entry: any) => {
+                        const confKey = `${entry.dataKey}_conf`
+                        const conf = entry.payload[confKey]
+                        return (
+                          <div key={entry.dataKey} className="flex items-center gap-2 py-0.5">
+                            <div className="w-2 h-2 rounded-full" style={{ background: entry.color }} />
+                            <span className="font-mono text-on-surface-variant">{entry.dataKey}</span>
+                            <span className="font-bold text-on-surface">{entry.value} {t('units')}</span>
+                            {conf != null && (
+                              <span className="text-on-surface-variant/60 ml-auto">({Math.round(conf * 100)}%)</span>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
                 }}
-                labelStyle={{ color: 'var(--color-on-surface)', fontWeight: 600, marginBottom: '6px' }}
                 cursor={{ stroke: 'var(--color-outline)', strokeWidth: 1 }}
               />
               <Legend
@@ -258,7 +382,13 @@ export default function AIOutputs() {
 
       {/* Donor Recommendations */}
       <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline">
-        <h2 className="font-headline font-bold text-base text-on-surface mb-5">{t('recommendedDonors')}</h2>
+        <div className="flex items-center gap-1.5 mb-5">
+          <h2 className="font-headline font-bold text-base text-on-surface">{t('recommendedDonors')}</h2>
+          <InfoPopover icon="help_outline" side="bottom">
+            <h4 className="font-headline font-bold text-sm mb-1.5">{t('explainDonorsTitle')}</h4>
+            <p className="text-xs text-on-surface-variant leading-relaxed">{t('explainDonorsBody')}</p>
+          </InfoPopover>
+        </div>
 
         {recommendations.length > 0 ? (
           <div className="space-y-1">

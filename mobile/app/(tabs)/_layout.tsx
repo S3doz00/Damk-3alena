@@ -6,6 +6,7 @@ import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -38,6 +39,7 @@ function ClassicTabLayout() {
   const isWeb = Platform.OS === "web";
   const { colors, theme } = useTheme();
   const { t } = useLanguage();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -48,10 +50,11 @@ function ClassicTabLayout() {
         tabBarStyle: {
           position: "absolute",
           backgroundColor: isIOS ? "transparent" : colors.card,
-          borderTopWidth: 1,
-          borderTopColor: colors.separator,
-          elevation: 0,
-          height: isWeb ? 84 : 65,
+          borderTopWidth: isIOS ? 1 : 1.5,
+          borderTopColor: isIOS ? colors.separator : (theme === "dark" ? "#2A2A3A" : "#E0E0E0"),
+          elevation: isIOS ? 0 : 8,
+          height: isWeb ? 84 : (65 + (isIOS ? 0 : insets.bottom)),
+          paddingBottom: isIOS ? 0 : insets.bottom,
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -98,6 +101,8 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="person.circle" tintColor={color} size={24} /> : <Feather name="user" size={22} color={color} />,
         }}
       />
+      <Tabs.Screen name="history" options={{ href: null }} />
+      <Tabs.Screen name="hospitals" options={{ href: null }} />
     </Tabs>
   );
 }

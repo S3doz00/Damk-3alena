@@ -132,7 +132,7 @@ function HospitalHeader({ hospital, colors }: { hospital: Facility; colors: any 
 
 export default function BookAppointmentScreen() {
   const { hospitalId } = useLocalSearchParams<{ hospitalId: string }>();
-  const { addAppointment, profile, facilities } = useApp();
+  const { addAppointment, profile, facilities, appointments } = useApp();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -142,6 +142,16 @@ export default function BookAppointmentScreen() {
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Check if donor already has an upcoming appointment
+  const upcomingAppointments = appointments.filter((a) => a.status === "upcoming");
+  const hasUpcoming = upcomingAppointments.length > 0;
+
+  // Check 90-day eligibility
+  const lastDonation = profile?.lastDonationDate;
+  const daysUntilEligible = lastDonation
+    ? Math.max(0, 90 - Math.floor((Date.now() - new Date(lastDonation).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
 
   const topPad = Platform.OS === "web" ? Math.max(insets.top, 67) : insets.top;
   const botPad = Platform.OS === "web" ? Math.max(insets.bottom, 34) : insets.bottom;
@@ -159,6 +169,8 @@ export default function BookAppointmentScreen() {
   }
 
   const handleBook = async () => {
+    if (hasUpcoming) { setError("You already have an upcoming appointment. Please complete or cancel it first."); return; }
+    if (daysUntilEligible > 0) { setError(`You must wait ${daysUntilEligible} more days before donating again.`); return; }
     if (!selectedDate) { setError("Please select a date."); return; }
     if (!selectedTime) { setError("Please select a time slot."); return; }
     setError("");
@@ -210,6 +222,20 @@ export default function BookAppointmentScreen() {
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
         <HospitalHeader hospital={hospital} colors={colors} />
       </View>
+
+      {/* Booking restriction warning */}
+      {(hasUpcoming || daysUntilEligible > 0) && (
+        <View style={{ paddingHorizontal: 20, marginBottom: 16 }}>
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, backgroundColor: "#FEF3C7", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#FCD34D" }}>
+            <Feather name="alert-triangle" size={18} color="#92400E" style={{ marginTop: 1 }} />
+            <Text style={{ flex: 1, fontSize: 13, color: "#92400E", lineHeight: 20, fontWeight: "500" }}>
+              {hasUpcoming
+                ? "You already have an upcoming appointment. Please complete or cancel it before booking a new one."
+                : `You donated recently. You must wait ${daysUntilEligible} more days before you can donate again.`}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* Date */}
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>

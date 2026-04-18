@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 
@@ -106,6 +106,10 @@ interface AppContextType {
       city: string;
       weightKg?: number;
     }
+  ) => Promise<{ success: boolean; error?: string; needsVerification?: boolean }>;
+  verifySignupOtp: (
+    email: string,
+    token: string
   ) => Promise<{ success: boolean; error?: string }>;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -127,6 +131,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Store pending signup profile data for OTP verification flow
+  const pendingSignupRef = useRef<{
+    authUserId: string;
+    profileData: {
+      firstName: string;
+      lastName: string;
+      phone: string;
+      nationalId: string;
+      bloodType: BloodType;
+      gender: Gender;
+      dateOfBirth: string;
+      city: string;
+      weightKg?: number;
+    };
+  } | null>(null);
+
+  // Track whether we're in a password recovery flow — skip auto-login redirect
+  const isRecoveringPasswordRef = useRef(false);
+
   // ─── Listen to auth state ──────────────────────────────────────────
   useEffect(() => {
     // Get initial session
@@ -141,7 +164,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      // During password recovery, Supabase creates a session but the user
+      // still needs to set a new password — don't mark as logged in yet
+      if (event === "PASSWORD_RECOVERY") {
+        isRecoveringPasswordRef.current = true;
+        setSession(s);
+        return;
+      }
+
+      // After the user updates their password, clear the recovery flag
+      if (event === "USER_UPDATED" && isRecoveringPasswordRef.current) {
+        isRecoveringPasswordRef.current = false;
+        // Sign out so they can log in fresh with the new password
+        supabase.auth.signOut();
+        return;
+      }
+
       setSession(s);
       if (s) {
         setIsLoggedIn(true);
@@ -267,6 +306,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function loadAppointments(donorId: string) {
+    // Purge expired 'booked' appointments (date in the past, never completed).
+    // Best-effort — if RLS blocks DELETE, we still filter them out of local state below.
+    const today = new Date().toISOString().slice(0, 10);
+    await supabase
+      .from("appointments")
+      .delete()
+      .eq("donor_id", donorId)
+      .eq("status", "booked")
+      .lt("appointment_date", today);
+
     const { data } = await supabase
       .from("appointments")
       .select("*, facilities(name, address)")
@@ -274,17 +323,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .order("appointment_date", { ascending: false });
 
     if (data) {
-      const mapped: Appointment[] = data.map((a: any) => ({
-        id: a.id,
-        fileNumber: a.ticket_code || `#${a.id.slice(0, 6).toUpperCase()}`,
-        hospitalId: a.facility_id,
-        hospitalName: a.facilities?.name || "Unknown",
-        hospitalAddress: a.facilities?.address || "",
-        date: a.appointment_date,
-        time: a.appointment_time,
-        status: a.status === "booked" ? "upcoming" : a.status,
-        bloodType: profile?.bloodType || "O+",
-      }));
+      const mapped: Appointment[] = data
+        .map((a: any) => ({
+          id: a.id,
+          fileNumber: a.ticket_code || `#${a.id.slice(0, 6).toUpperCase()}`,
+          hospitalId: a.facility_id,
+          hospitalName: a.facilities?.name || "Unknown",
+          hospitalAddress: a.facilities?.address || "",
+          date: a.appointment_date,
+          time: a.appointment_time,
+          status: a.status === "booked" ? "upcoming" : a.status,
+          bloodType: profile?.bloodType || "O+",
+        }))
+        // Safety net: drop any past 'upcoming' appointments that survived the DELETE
+        // (e.g. RLS denied, offline, or clock skew).
+        .filter((a) => !(a.status === "upcoming" && a.date < today));
       setAppointments(mapped);
     }
   }
@@ -347,7 +400,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       city: string;
       weightKg?: number;
     }
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; needsVerification?: boolean }> => {
     try {
       // 1. Sign up with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -368,6 +421,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
       if (!authData.user) {
         return { success: false, error: "Sign up failed. Please try again." };
+      }
+
+      // If email confirmation is enabled, user won't have a session yet
+      if (!authData.session && !authData.user.confirmed_at) {
+        pendingSignupRef.current = { authUserId: authData.user.id, profileData };
+        return { success: true, needsVerification: true };
       }
 
       // 2. Wait for trigger to create user row — retry up to 5 times
@@ -395,8 +454,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .update({ phone: profileData.phone })
         .eq("id", userRow.id);
 
-      // 4. Create donor profile
-      const { error: donorError } = await supabase.from("donors").insert({
+      // 4. Create donor profile (upsert to handle retries)
+      const { error: donorError } = await supabase.from("donors").upsert({
         user_id: userRow.id,
         national_id: profileData.nationalId,
         blood_type: profileData.bloodType,
@@ -404,7 +463,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         birth_date: profileData.dateOfBirth,
         city: profileData.city,
         weight_kg: profileData.weightKg || null,
-      });
+      }, { onConflict: "user_id" });
 
       if (donorError) {
         console.error("Donor insert error:", donorError);
@@ -416,6 +475,102 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (err: any) {
       console.error("Signup error:", err);
+      return { success: false, error: err.message || "Something went wrong." };
+    }
+  };
+
+  const verifySignupOtp = async (
+    email: string,
+    token: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error: otpError } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "signup",
+      });
+
+      if (otpError) {
+        return { success: false, error: otpError.message };
+      }
+
+      if (!data.user) {
+        return { success: false, error: "Verification failed. Please try again." };
+      }
+
+      const pending = pendingSignupRef.current;
+      if (!pending) {
+        // No pending data — user might have restarted, just log them in
+        await loadUserData(data.user.id);
+        return { success: true };
+      }
+
+      // Complete profile setup: wait for trigger to create user row
+      let userRow: any = null;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        await new Promise((r) => setTimeout(r, 800 + attempt * 500));
+        const { data: row } = await supabase
+          .from("users")
+          .select("id")
+          .eq("auth_id", data.user.id)
+          .single();
+        if (row) {
+          userRow = row;
+          break;
+        }
+      }
+
+      if (!userRow) {
+        return { success: false, error: "Verified but profile setup timed out. Please try logging in." };
+      }
+
+      // Update user row with phone
+      await supabase
+        .from("users")
+        .update({ phone: pending.profileData.phone })
+        .eq("id", userRow.id);
+
+      // Check for national_id collision on a DIFFERENT user before insert
+      const { data: existingDonor } = await supabase
+        .from("donors")
+        .select("user_id")
+        .eq("national_id", pending.profileData.nationalId)
+        .maybeSingle();
+
+      if (existingDonor && existingDonor.user_id !== userRow.id) {
+        return {
+          success: false,
+          error: "This national ID is already registered to another account. Please log in with your existing account instead.",
+        };
+      }
+
+      // Create donor profile (upsert to handle retries for same user)
+      const { error: donorError } = await supabase.from("donors").upsert({
+        user_id: userRow.id,
+        national_id: pending.profileData.nationalId,
+        blood_type: pending.profileData.bloodType,
+        gender: pending.profileData.gender,
+        birth_date: pending.profileData.dateOfBirth,
+        city: pending.profileData.city,
+        weight_kg: pending.profileData.weightKg || null,
+      }, { onConflict: "user_id" });
+
+      if (donorError) {
+        console.error("Donor insert error after OTP:", donorError);
+        if (donorError.code === "23505" && donorError.message.includes("national_id")) {
+          return {
+            success: false,
+            error: "This national ID is already registered. Please log in with your existing account.",
+          };
+        }
+        return { success: false, error: "Verified but could not save profile: " + donorError.message };
+      }
+
+      pendingSignupRef.current = null;
+      await loadUserData(data.user.id);
+      return { success: true };
+    } catch (err: any) {
+      console.error("OTP verify error:", err);
       return { success: false, error: err.message || "Something went wrong." };
     }
   };
@@ -627,6 +782,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         markAllNotificationsRead,
         completeOnboarding,
         signUp,
+        verifySignupOtp,
         login,
         logout,
         unreadCount,

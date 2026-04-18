@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
+import GlassCard from "@/components/GlassCard";
+import { Fonts } from "@/constants/fonts";
 import { useTheme } from "@/context/ThemeContext";
 import { Appointment, useApp } from "@/context/AppContext";
 
@@ -110,27 +112,31 @@ export default function HospitalDetailScreen() {
       </View>
 
       {/* Info Card */}
-      <View style={{ backgroundColor: colors.card, marginHorizontal: 20, borderRadius: 16, padding: 20, marginBottom: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3 }}>
-        <Text style={{ fontSize: 20, fontWeight: "800", color: colors.text, marginBottom: 14 }}>{hospital.name}</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <Feather name="map-pin" size={15} color={colors.textSecondary} />
-          <Text style={{ fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.address}</Text>
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <Feather name="clock" size={15} color={colors.textSecondary} />
-          <Text style={{ fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.workingHours}</Text>
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Feather name="navigation" size={15} color={colors.textSecondary} />
-          <Text style={{ fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.city}, Jordan</Text>
-        </View>
+      <View style={{ marginHorizontal: 20, marginBottom: 24 }}>
+        <GlassCard glowColor={colors.primary} borderRadius={16}>
+          <View style={{ padding: 20 }}>
+            <Text style={{ fontFamily: Fonts.extrabold, fontSize: 20, color: colors.text, marginBottom: 14, letterSpacing: -0.4 }}>{hospital.name}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <Feather name="map-pin" size={15} color={colors.textSecondary} />
+              <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.address}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <Feather name="clock" size={15} color={colors.textSecondary} />
+              <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.workingHours}</Text>
+            </View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <Feather name="navigation" size={15} color={colors.textSecondary} />
+              <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, flex: 1 }}>{hospital.city}, Jordan</Text>
+            </View>
+          </View>
+        </GlassCard>
       </View>
 
       {/* Book Appointment */}
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-        <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text, marginBottom: 16 }}>Book Appointment</Text>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 18, color: colors.text, marginBottom: 16, letterSpacing: -0.3 }}>Book Appointment</Text>
 
-        <Text style={{ fontSize: 13, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>Select Date</Text>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1.4, marginBottom: 12 }}>Select Date</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {DATES.map((d) => (
             <TouchableOpacity
@@ -142,14 +148,14 @@ export default function HospitalDetailScreen() {
               }}
               onPress={() => { Haptics.selectionAsync(); setSelectedDate(d); }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "600", color: selectedDate === d ? "#fff" : colors.text }}>
+              <Text style={{ fontFamily: Fonts.semibold, fontSize: 14, color: selectedDate === d ? "#fff" : colors.text }}>
                 {formatDateLabel(d)}
               </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
-        <Text style={{ fontSize: 13, fontWeight: "600", color: colors.textSecondary, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12, marginTop: 20 }}>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 1.4, marginBottom: 12, marginTop: 20 }}>
           Select Time
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
@@ -163,7 +169,7 @@ export default function HospitalDetailScreen() {
               }}
               onPress={() => { Haptics.selectionAsync(); setSelectedTime(t); }}
             >
-              <Text style={{ fontSize: 14, fontWeight: "600", color: selectedTime === t ? "#fff" : colors.text }}>
+              <Text style={{ fontFamily: Fonts.semibold, fontSize: 14, color: selectedTime === t ? "#fff" : colors.text }}>
                 {t}
               </Text>
             </TouchableOpacity>
@@ -172,7 +178,7 @@ export default function HospitalDetailScreen() {
 
         <View style={{ flexDirection: "row", gap: 10, backgroundColor: "#FEF2F2", padding: 14, borderRadius: 12, marginTop: 20, marginBottom: 20 }}>
           <Feather name="alert-circle" size={16} color={colors.primary} />
-          <Text style={{ flex: 1, fontSize: 13, color: Colors.light.primaryDark, lineHeight: 18 }}>
+          <Text style={{ flex: 1, fontFamily: Fonts.medium, fontSize: 13, color: Colors.light.primaryDark, lineHeight: 18 }}>
             Please fast for 4 hours before donating. Stay hydrated and get enough sleep.
           </Text>
         </View>
@@ -189,7 +195,7 @@ export default function HospitalDetailScreen() {
           activeOpacity={0.85}
         >
           <Feather name="calendar" size={20} color="#fff" />
-          <Text style={{ color: "#fff", fontSize: 17, fontWeight: "700" }}>
+          <Text style={{ fontFamily: Fonts.bold, color: "#fff", fontSize: 17, letterSpacing: 0.2 }}>
             {booking ? "Booking..." : "Confirm Appointment"}
           </Text>
         </TouchableOpacity>

@@ -27,10 +27,16 @@ export default function Appointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
+  const [clearingExpired, setClearingExpired] = useState(false)
   const [sort, setSort] = useState<SortOption>('newest')
 
+  const today = new Date().toISOString().slice(0, 10)
+
   useEffect(() => {
-    loadAppointments()
+    (async () => {
+      await supabase.rpc('delete_expired_booked_appointments')
+      await loadAppointments()
+    })()
   }, [])
 
   async function loadAppointments() {
@@ -55,14 +61,24 @@ export default function Appointments() {
     const cancelledCount = appointments.filter(a => a.status === 'cancelled').length
     if (cancelledCount === 0) return
     setClearing(true)
-    // Optimistic update — remove from UI immediately
     setAppointments(prev => prev.filter(a => a.status !== 'cancelled'))
-    // RPC is SECURITY DEFINER — bypasses RLS. Trust it.
     const { error } = await supabase.rpc('delete_cancelled_appointments')
     if (error) {
       console.error('Clear cancelled failed:', error.message)
     }
     setClearing(false)
+  }
+
+  async function clearExpired() {
+    const expired = appointments.filter(a => a.status === 'booked' && a.appointment_date < today)
+    if (expired.length === 0) return
+    setClearingExpired(true)
+    setAppointments(prev => prev.filter(a => !(a.status === 'booked' && a.appointment_date < today)))
+    const { error } = await supabase.rpc('delete_expired_booked_appointments')
+    if (error) {
+      console.error('Clear expired failed:', error.message)
+    }
+    setClearingExpired(false)
   }
 
   const sorted = [...appointments].sort((a, b) => {
@@ -73,6 +89,7 @@ export default function Appointments() {
   })
 
   const cancelledCount = appointments.filter(a => a.status === 'cancelled').length
+  const expiredCount = appointments.filter(a => a.status === 'booked' && a.appointment_date < today).length
 
   const statusColors: Record<string, string> = {
     booked: 'bg-secondary/10 text-secondary',
@@ -118,6 +135,17 @@ export default function Appointments() {
               expand_more
             </span>
           </div>
+
+          {expiredCount > 0 && (
+            <button
+              onClick={clearExpired}
+              disabled={clearingExpired}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-outline/10 hover:bg-outline/20 text-on-surface-variant text-sm font-semibold transition-all duration-150 border border-outline/20 cursor-pointer disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>schedule</span>
+              {clearingExpired ? t('clearing') : `${t('clearExpiredBtn')} (${expiredCount})`}
+            </button>
+          )}
 
           {cancelledCount > 0 && (
             <button

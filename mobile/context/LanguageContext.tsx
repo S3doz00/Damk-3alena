@@ -91,6 +91,7 @@ const translations: Record<string, Record<Lang, string>> = {
   findHospitalBtn:  { en: 'Find a Hospital', ar: 'ابحث عن مستشفى' },
   quickActions:     { en: 'QUICK ACTIONS',   ar: 'إجراءات سريعة' },
   urgentRequests:   { en: 'Urgent Requests', ar: 'الطلبات العاجلة' },
+  myCampaigns:      { en: 'My Campaigns',    ar: 'حملاتي' },
   notifications:    { en: 'Notifications',   ar: 'الإشعارات' },
   signOut:          { en: 'Sign Out',        ar: 'تسجيل الخروج' },
   signOutConfirm:   { en: 'Are you sure you want to sign out?', ar: 'هل أنت متأكد من تسجيل الخروج؟' },
@@ -219,7 +220,7 @@ const translations: Record<string, Record<Lang, string>> = {
   newEmailLabel:            { en: 'New Email Address',     ar: 'البريد الإلكتروني الجديد' },
   updateEmail:              { en: 'Update Email',          ar: 'تحديث البريد الإلكتروني' },
   updating:                 { en: 'Updating...',           ar: 'جارٍ التحديث...' },
-  emailUpdated:             { en: 'Email updated! Check your inbox to confirm.', ar: 'تم تحديث البريد! تحقق من صندوق الوارد للتأكيد.' },
+  emailUpdated:             { en: 'Email Updated!', ar: 'تم تحديث البريد!' },
   emailAddressField:        { en: 'Email Address',         ar: 'البريد الإلكتروني' },
   editEmail:                { en: 'Edit',                  ar: 'تعديل' },
 
@@ -234,6 +235,37 @@ const translations: Record<string, Record<Lang, string>> = {
   statusCompleted:      { en: 'completed',           ar: 'مكتمل' },
   statusScheduled:      { en: 'scheduled',           ar: 'مجدول' },
   statusCancelled:      { en: 'cancelled',           ar: 'ملغى' },
+
+  // Forgot Password (OTP flow)
+  forgotPasswordTitle:  { en: 'Reset Password',      ar: 'إعادة تعيين كلمة المرور' },
+  forgotPasswordDesc:   { en: 'Enter your email and we\'ll send you a 8-digit code to reset your password.', ar: 'أدخل بريدك الإلكتروني وسنرسل لك رمزًا من 8 أرقام لإعادة تعيين كلمة المرور.' },
+  enterYourEmail:       { en: 'Email address',        ar: 'البريد الإلكتروني' },
+  sendResetCode:        { en: 'Send Reset Code',      ar: 'إرسال رمز إعادة التعيين' },
+  enterCode:            { en: 'Enter Code',            ar: 'أدخل الرمز' },
+  codeSentTo:           { en: 'We sent a 8-digit code to', ar: 'أرسلنا رمزًا من 8 أرقام إلى' },
+  resendCode:           { en: 'Resend Code',           ar: 'إعادة إرسال الرمز' },
+  setNewPassword:       { en: 'Set New Password',      ar: 'تعيين كلمة مرور جديدة' },
+  setNewPasswordDesc:   { en: 'Choose a strong password for your account.', ar: 'اختر كلمة مرور قوية لحسابك.' },
+  newPassword:          { en: 'New Password',          ar: 'كلمة المرور الجديدة' },
+  passwordMinLength:    { en: 'Password must be at least 6 characters.', ar: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.' },
+  resetPassword:        { en: 'Reset Password',        ar: 'إعادة تعيين كلمة المرور' },
+  passwordResetSuccess: { en: 'Password Reset!',       ar: 'تم إعادة تعيين كلمة المرور!' },
+  passwordResetSuccessDesc: { en: 'Your password has been updated. You can now log in with your new password.', ar: 'تم تحديث كلمة مرورك. يمكنك الآن تسجيل الدخول بكلمة مرورك الجديدة.' },
+  backToLogin:          { en: 'Back to Login',         ar: 'العودة لتسجيل الدخول' },
+  back:                 { en: 'Back',                  ar: 'رجوع' },
+
+  // Email Verification (OTP)
+  verifyEmailTitle:     { en: 'Verify Your Email',     ar: 'تحقق من بريدك الإلكتروني' },
+  verifyEmailDesc:      { en: 'We\'ve sent a 8-digit code to', ar: 'لقد أرسلنا رمزًا من 8 أرقام إلى' },
+  enterOtpCode:         { en: 'Enter the code below to verify your account.', ar: 'أدخل الرمز أدناه للتحقق من حسابك.' },
+  verifyCode:           { en: 'Verify Code',           ar: 'تحقق من الرمز' },
+  verificationFailed:   { en: 'Invalid or expired code. Please try again.', ar: 'رمز غير صالح أو منتهي الصلاحية. حاول مجددًا.' },
+  resendEmail:          { en: 'Resend Code',           ar: 'إعادة إرسال الرمز' },
+  resendIn:             { en: 'Resend in',             ar: 'إعادة الإرسال خلال' },
+  emailSent:            { en: 'Code sent!',            ar: 'تم إرسال الرمز!' },
+
+  // Edit Email (OTP)
+  emailUpdatedDesc:     { en: 'Your email has been updated successfully.', ar: 'تم تحديث بريدك الإلكتروني بنجاح.' },
 }
 
 const LanguageContext = createContext<LanguageContextValue>({

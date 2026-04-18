@@ -11,6 +11,11 @@ import CreateRequest from './pages/CreateRequest'
 import Appointments from './pages/Appointments'
 import Requests from './pages/Requests'
 import AIOutputs from './pages/AIOutputs'
+import BloodMap from './pages/BloodMap'
+import CreateCampaign from './pages/CreateCampaign'
+import Campaigns from './pages/Campaigns'
+import EditCampaign from './pages/EditCampaign'
+import StaffProfile from './pages/StaffProfile'
 import UserManagement from './pages/admin/UserManagement'
 import SystemSettings from './pages/admin/SystemSettings'
 import Layout from './components/Layout'
@@ -61,6 +66,11 @@ function App() {
           <Route path="appointments" element={<Appointments />} />
           <Route path="requests" element={<Requests />} />
           <Route path="ai-outputs" element={<AIOutputs />} />
+          <Route path="blood-map" element={<BloodMap />} />
+          <Route path="campaigns" element={<Campaigns />} />
+          <Route path="campaigns/new" element={<CreateCampaign />} />
+          <Route path="campaigns/:id/edit" element={<EditCampaign />} />
+          <Route path="profile" element={<StaffProfile />} />
           <Route path="admin/users" element={<UserManagement />} />
           <Route path="admin/settings" element={<SystemSettings />} />
         </Route>

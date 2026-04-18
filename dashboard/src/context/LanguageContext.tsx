@@ -30,6 +30,19 @@ const translations: Record<string, Record<Lang, string>> = {
   signOut:          { en: 'Sign Out',        ar: 'تسجيل الخروج' },
   language:         { en: 'Language',        ar: 'اللغة' },
 
+  bloodMap:         { en: 'Blood Map',       ar: 'خريطة الدم' },
+
+  // Blood Map page
+  bloodSupplyMap:   { en: 'Blood Supply Map', ar: 'خريطة إمداد الدم' },
+  loadingMap:       { en: 'Loading map...',   ar: 'جارٍ تحميل الخريطة...' },
+  mapHealthy:       { en: 'Adequate',         ar: 'كافي' },
+  heatmapLabel:     { en: 'Demand intensity', ar: 'كثافة الطلب' },
+  mapFacilities:    { en: 'Facilities',       ar: 'المنشآت' },
+  totalUnits:       { en: 'Units total',      ar: 'وحدات الإجمالي' },
+  bloodInventory:   { en: 'Blood Inventory',  ar: 'مخزون الدم' },
+  mapBloodBank:     { en: 'Blood Bank',       ar: 'بنك دم' },
+  mapHospital:      { en: 'Hospital',         ar: 'مستشفى' },
+
   // Theme labels
   themeLight:       { en: 'Light',   ar: 'فاتح' },
   themeDark:        { en: 'Dark',    ar: 'داكن' },
@@ -53,6 +66,7 @@ const translations: Record<string, Record<Lang, string>> = {
   goToDashboard:    { en: 'Go to Dashboard', ar: 'الذهاب للوحة التحكم' },
   footerText:       { en: 'Damk 3alena — Built in Jordan with AI', ar: 'دمك علينا — مبني في الأردن بالذكاء الاصطناعي' },
   adminLabel:       { en: 'Admin', ar: 'الإدارة' },
+  staffLabel:       { en: 'Staff', ar: 'الموظف' },
 
   // Stat labels (about page)
   statBloodTypes:   { en: 'Blood Types Tracked',  ar: 'فصائل الدم المتتبعة' },
@@ -102,6 +116,7 @@ const translations: Record<string, Record<Lang, string>> = {
   oldestFirst:      { en: 'Oldest First',  ar: 'الأقدم أولاً' },
   byStatus:         { en: 'By Status',     ar: 'حسب الحالة' },
   clearCancelledBtn:{ en: 'Clear Cancelled', ar: 'حذف الملغيات' },
+  clearExpiredBtn:  { en: 'Clear Expired', ar: 'حذف المنتهية' },
   clearing:         { en: 'Clearing…',     ar: 'جارٍ الحذف…' },
   noAppointmentsYet:{ en: 'No appointments yet', ar: 'لا توجد مواعيد بعد' },
   noAppointmentsDesc: { en: 'Appointments will appear here when donors book them.', ar: 'ستظهر المواعيد هنا عندما يحجزها المتبرعون.' },
@@ -135,11 +150,15 @@ const translations: Record<string, Record<Lang, string>> = {
   noRequestsYet:      { en: 'No requests yet',   ar: 'لا توجد طلبات بعد' },
   unitNeeded:         { en: 'unit needed',        ar: 'وحدة مطلوبة' },
   unitsNeededPlural:  { en: 'units needed',       ar: 'وحدة مطلوبة' },
+  unitsShort:         { en: 'units',               ar: 'وحدة' },
   updateStatus:       { en: 'Update status:',     ar: 'تحديث الحالة:' },
   patient:            { en: 'Patient:',           ar: 'المريض:' },
   created:            { en: 'Created',            ar: 'تاريخ الإنشاء' },
   urgency_normal:     { en: 'normal',             ar: 'عادي' },
   urgency_urgent:     { en: 'urgent',             ar: 'عاجل' },
+  urgency_low:        { en: 'low',                ar: 'منخفض' },
+  urgency_medium:     { en: 'medium',             ar: 'متوسط' },
+  urgency_high:       { en: 'high',               ar: 'مرتفع' },
   urgency_critical:   { en: 'critical',           ar: 'حرج' },
   reqStatus_open:     { en: 'open',               ar: 'مفتوح' },
   reqStatus_in_progress: { en: 'in progress',     ar: 'قيد التنفيذ' },
@@ -166,6 +185,18 @@ const translations: Record<string, Record<Lang, string>> = {
   role_donor:         { en: 'donor',    ar: 'متبرع' },
   role_staff:         { en: 'staff',    ar: 'موظف' },
   role_admin:         { en: 'admin',    ar: 'مسؤول' },
+
+  // Create User modal
+  createUser:         { en: 'Create User',   ar: 'إنشاء مستخدم' },
+  createUserTitle:    { en: 'Create New User', ar: 'إنشاء مستخدم جديد' },
+  createUserDesc:     { en: 'Add a donor, staff, or admin account. Staff accounts must be linked to a facility.', ar: 'إضافة حساب متبرع أو موظف أو مسؤول. يجب ربط حسابات الموظفين بمنشأة.' },
+  passwordLabel:      { en: 'Password',     ar: 'كلمة المرور' },
+  phoneOptional:      { en: 'Phone (optional)', ar: 'الهاتف (اختياري)' },
+  positionOptional:   { en: 'Position (optional)', ar: 'المنصب (اختياري)' },
+  cancel:             { en: 'Cancel',       ar: 'إلغاء' },
+  creating:           { en: 'Creating...',  ar: 'جارٍ الإنشاء...' },
+  userCreated:        { en: 'User created successfully', ar: 'تم إنشاء المستخدم بنجاح' },
+  selectFacilityFirst: { en: 'Select a facility', ar: 'اختر منشأة' },
 
   // System Settings page
   systemSettingsDesc: { en: 'Configure thresholds and notification rules for the system.', ar: 'ضبط الحدود وقواعد الإشعارات للنظام.' },
@@ -215,8 +246,8 @@ const translations: Record<string, Record<Lang, string>> = {
   backToHome:         { en: 'Back',      ar: 'رجوع' },
 
   // Sidebar
-  collapseSidebar:    { en: 'Collapse sidebar', ar: 'طي الشريط الجانبي' },
-  expandSidebar:      { en: 'Expand sidebar',   ar: 'توسيع الشريط الجانبي' },
+  lockSidebar:        { en: 'Lock sidebar open', ar: 'تثبيت الشريط الجانبي' },
+  unlockSidebar:      { en: 'Unlock sidebar',    ar: 'إلغاء تثبيت الشريط الجانبي' },
 
   // Dashboard filtering
   filteredBy:         { en: 'Filtered by',    ar: 'تصفية حسب' },
@@ -224,6 +255,97 @@ const translations: Record<string, Record<Lang, string>> = {
   clearFilter:        { en: 'Clear filter',   ar: 'مسح التصفية' },
   allBloodTypes:      { en: 'All blood types', ar: 'جميع فصائل الدم' },
   bookings:           { en: 'bookings',       ar: 'حجز' },
+
+  // Blood Map — info popup & localization
+  mapUnits:           { en: 'units',           ar: 'وحدة' },
+  mapInfoTitle:       { en: 'About this Map',  ar: 'حول هذه الخريطة' },
+  mapInfoContent:     { en: 'This map displays real-time blood supply levels across healthcare facilities in Jordan. Markers indicate facility status: red for critical shortages, amber for warnings, and green for adequate supply. The heatmap overlay shows demand intensity — darker areas indicate higher shortage risk.', ar: 'تعرض هذه الخريطة مستويات إمداد الدم في الوقت الفعلي عبر المنشآت الصحية في الأردن. تشير العلامات إلى حالة المنشأة: الأحمر للنقص الحرج، والبرتقالي للتحذيرات، والأخضر للإمداد الكافي. تُظهر طبقة الحرارة كثافة الطلب — المناطق الأغمق تشير إلى خطر نقص أعلى.' },
+
+  // Create Campaign page
+  campaigns:          { en: 'Campaigns',       ar: 'الحملات' },
+  campaignsListDesc:  { en: 'Manage your blood donation campaigns.', ar: 'إدارة حملات التبرع بالدم.' },
+  newCampaign:        { en: 'New Campaign',    ar: 'حملة جديدة' },
+  noCampaigns:        { en: 'No campaigns yet — create one to get started.', ar: 'لا توجد حملات بعد — أنشئ واحدة للبدء.' },
+  editCampaign:       { en: 'Edit Campaign',   ar: 'تعديل الحملة' },
+  editCampaignDesc:   { en: 'Update campaign details.', ar: 'تحديث تفاصيل الحملة.' },
+  saveCampaign:       { en: 'Save Changes',    ar: 'حفظ التغييرات' },
+  campaignUpdated:    { en: 'Campaign updated successfully', ar: 'تم تحديث الحملة بنجاح' },
+  deleteCampaign:     { en: 'Delete',          ar: 'حذف' },
+  confirmDeleteCampaign: { en: 'Delete this campaign? This cannot be undone.', ar: 'حذف هذه الحملة؟ لا يمكن التراجع عن هذا.' },
+  progress:           { en: 'Progress',        ar: 'التقدم' },
+  donorsUnit:         { en: 'donors',          ar: 'متبرع' },
+  completed:          { en: 'Completed',       ar: 'مكتمل' },
+  edit:               { en: 'Edit',            ar: 'تعديل' },
+  filter_all:         { en: 'All',             ar: 'الكل' },
+  filter_active:      { en: 'Active',          ar: 'النشطة' },
+  filter_past:        { en: 'Past',            ar: 'السابقة' },
+  campaignActive:     { en: 'Campaign is active (visible in mobile app)', ar: 'الحملة نشطة (مرئية في تطبيق الجوال)' },
+  createCampaign:     { en: 'Create Campaign', ar: 'إنشاء حملة' },
+  createCampaignDesc: { en: 'Launch a blood donation campaign targeting specific blood types.', ar: 'أطلق حملة تبرع بالدم تستهدف فصائل دم محددة.' },
+  campaignName:       { en: 'Campaign Name',   ar: 'اسم الحملة' },
+  campaignNamePlaceholder: { en: 'Enter campaign name', ar: 'أدخل اسم الحملة' },
+  targetFacility:     { en: 'Target Facility', ar: 'المنشأة المستهدفة' },
+  selectFacility:     { en: 'Select a facility', ar: 'اختر منشأة' },
+  startDate:          { en: 'Start Date',      ar: 'تاريخ البدء' },
+  endDate:            { en: 'End Date',        ar: 'تاريخ الانتهاء' },
+  targetUnits:        { en: 'Target Units',    ar: 'الوحدات المستهدفة' },
+  bloodTypesNeeded:   { en: 'Blood Types Needed', ar: 'فصائل الدم المطلوبة' },
+  description:        { en: 'Description',     ar: 'الوصف' },
+  campaignDescPlaceholder: { en: 'Describe the campaign goals...', ar: 'صف أهداف الحملة...' },
+  submitCampaign:     { en: 'Create Campaign', ar: 'إنشاء الحملة' },
+  campaignCreated:    { en: 'Campaign created successfully!', ar: 'تم إنشاء الحملة بنجاح!' },
+  creatingCampaign:   { en: 'Creating...',     ar: 'جارٍ الإنشاء...' },
+
+  // Staff Profile page
+  editProfile:        { en: 'Profile',         ar: 'الملف الشخصي' },
+  editProfileDesc:    { en: 'Update your profile information and facility assignment.', ar: 'حدّث معلومات ملفك الشخصي وتعيين المنشأة.' },
+  firstName:          { en: 'First Name',      ar: 'الاسم الأول' },
+  lastName:           { en: 'Last Name',       ar: 'اسم العائلة' },
+  phone:              { en: 'Phone',           ar: 'الهاتف' },
+  email:              { en: 'Email',           ar: 'البريد الإلكتروني' },
+  facility:           { en: 'Facility',        ar: 'المنشأة' },
+  position:           { en: 'Position',        ar: 'المنصب' },
+  role:               { en: 'Role',            ar: 'الدور' },
+  profileUpdated:     { en: 'Profile updated successfully!', ar: 'تم تحديث الملف الشخصي بنجاح!' },
+  updating:           { en: 'Updating...',     ar: 'جارٍ التحديث...' },
+  updateProfile:      { en: 'Update Profile',  ar: 'تحديث الملف الشخصي' },
+
+  // AI Insights enhancements (Task 7)
+  facilityLabel:      { en: 'Facility',        ar: 'المنشأة' },
+  predictedDemand:    { en: 'Predicted demand', ar: 'الطلب المتوقع' },
+  recommendedAction:  { en: 'Recommended action', ar: 'الإجراء الموصى به' },
+  urgentDonorOutreach:{ en: 'Initiate urgent donor outreach', ar: 'ابدأ تواصل عاجل مع المتبرعين' },
+  contactFacilities:  { en: 'Contact neighboring facilities for transfer', ar: 'تواصل مع المنشآت المجاورة للتحويل' },
+  monitorClosely:     { en: 'Monitor closely and prepare outreach', ar: 'راقب عن كثب واستعد للتواصل' },
+  detectedAt:         { en: 'Detected',        ar: 'تم الاكتشاف' },
+  confidence:         { en: 'Confidence',      ar: 'الثقة' },
+  dataQuality:        { en: 'Forecast Confidence', ar: 'ثقة التوقع' },
+  dataQualityHigh:    { en: 'High confidence',  ar: 'ثقة عالية' },
+  dataQualityMedium:  { en: 'Medium confidence', ar: 'ثقة متوسطة' },
+  dataQualityLow:     { en: 'Low confidence',   ar: 'ثقة منخفضة' },
+  currentStock:       { en: 'Current stock',    ar: 'المخزون الحالي' },
+  units:              { en: 'units',            ar: 'وحدة' },
+  // AI Insights — Step 3 clarity
+  criticalExplain:    { en: 'Stock is critically low compared to predicted demand. Immediate action required to avoid running out.', ar: 'المخزون منخفض جدًا مقارنة بالطلب المتوقع. يلزم اتخاذ إجراء فوري لتفادي النفاد.' },
+  warningExplain:     { en: 'Supply is below the safe threshold. Predicted demand is approaching your available stock.', ar: 'المخزون أقل من الحد الآمن. الطلب المتوقع يقترب من المخزون المتاح.' },
+  shortfall:          { en: 'Projected shortfall', ar: 'النقص المتوقع' },
+  statusNow:          { en: 'Now', ar: 'الآن' },
+  statusNextWeek:     { en: 'Next week', ar: 'الأسبوع القادم' },
+  suggestCampaign:    { en: 'Open a targeted donation campaign for this blood type', ar: 'افتح حملة تبرع موجهة لهذه الفصيلة' },
+  // Blood Map — facility detail overlay
+  closeCard:          { en: 'Close details', ar: 'إغلاق البطاقة' },
+  predictedDemandNext:{ en: 'Predicted need · next week', ar: 'الحاجة المتوقعة · الأسبوع القادم' },
+  totalStockShort:    { en: 'Stock in hand', ar: 'المخزون الحالي' },
+  supplyVsDemand:     { en: 'Supply vs. predicted demand', ar: 'المخزون مقابل الطلب المتوقع' },
+  noForecastForFacility: { en: 'No AI forecast available for this facility yet.', ar: 'لا توجد توقعات ذكاء اصطناعي لهذه المنشأة حتى الآن.' },
+  // AI Insights — "Explain this" popovers
+  explainForecastTitle: { en: 'How the forecast works', ar: 'كيف يعمل التوقع' },
+  explainForecastBody:  { en: 'An XGBoost quantile regression model predicts weekly units needed per blood type. It uses facility size, region, blood type, week-of-year (seasonality), Ramadan/holiday flags, and rolling 4/8/12-week averages of past consumption. "Confidence" measures how narrow the AI\'s prediction interval is — 100% means the model is very sure, low % means the prediction has wide uncertainty.', ar: 'نموذج انحدار كمي XGBoost يتوقع الوحدات الأسبوعية لكل فصيلة. يستخدم حجم المنشأة والمنطقة والفصيلة والأسبوع من السنة (موسمية) وإشارات رمضان/العطلات ومتوسطات الاستهلاك خلال 4/8/12 أسبوعًا. "الثقة" تقيس مدى ضيق نطاق التنبؤ — 100% تعني ثقة عالية، ونسبة منخفضة تعني عدم يقين واسع.' },
+  explainShortageTitle: { en: 'How shortage alerts are generated', ar: 'كيف يتم إنشاء تنبيهات النقص' },
+  explainShortageBody:  { en: 'The AI compares current stock to predicted demand. If stock < 5 units, severity is "critical". If stock < 15 units, severity is "warning". Red cards mean action now; amber means monitor and prepare.', ar: 'يقارن الذكاء الاصطناعي المخزون الحالي بالطلب المتوقع. إذا كان المخزون أقل من 5 وحدات فالخطورة "حرج"، وأقل من 15 وحدة فالخطورة "تحذير". البطاقات الحمراء تعني اتخاذ إجراء الآن، والصفراء تعني المراقبة.' },
+  explainDonorsTitle:   { en: 'How donor ranking works', ar: 'كيف يعمل ترتيب المتبرعين' },
+  explainDonorsBody:    { en: 'Each donor is scored by blood-type compatibility (exact match, O- universal, AB+ universal recipient), distance from the facility (closer = higher score), eligibility status (days since last donation), and donation history. The bar shows each donor\'s score relative to the top candidate.', ar: 'يتم تقييم كل متبرع بناءً على توافق الفصيلة (تطابق مباشر، O- متبرع عام، AB+ مستقبل عام)، والمسافة من المنشأة (أقرب = درجة أعلى)، والأهلية (الأيام منذ آخر تبرع)، وسجل التبرعات. يظهر الشريط درجة كل متبرع مقارنةً بالأول.' },
+  explainLabel:         { en: 'Explain', ar: 'شرح' },
 }
 
 const LanguageContext = createContext<LanguageContextValue>({

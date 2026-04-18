@@ -265,8 +265,11 @@ export default function SignupScreen() {
 
     if (result.success) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      // Supabase auto-confirms in dev → user is logged in automatically
-      router.replace("/(tabs)");
+      if (result.needsVerification) {
+        router.replace({ pathname: "/auth/verify-email", params: { email: email.trim().toLowerCase() } });
+      } else {
+        router.replace("/(tabs)");
+      }
     } else {
       setError(result.error || t('signUpFailed'));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

@@ -1,10 +1,12 @@
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
+  PlusJakartaSans_300Light,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
   useFonts,
-} from "@expo-google-fonts/inter";
+} from "@expo-google-fonts/plus-jakarta-sans";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -50,6 +52,8 @@ function RootLayoutNav() {
       <Stack.Screen name="auth/login" options={{ animation: "none" }} />
       <Stack.Screen name="auth/signup" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="auth/otp" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="auth/forgot-password" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="auth/verify-email" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="auth/location" options={{ animation: "fade" }} />
       <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
       <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
@@ -57,6 +61,7 @@ function RootLayoutNav() {
       <Stack.Screen name="hospital/[id]" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="campaign/[id]" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="campaigns" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="my-campaigns" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="notifications" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="appointment/book" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="appointment/ticket" options={{ animation: "slide_from_right" }} />
@@ -67,10 +72,12 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    PlusJakartaSans_300Light,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
   });
 
   useEffect(() => {

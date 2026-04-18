@@ -9,6 +9,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import GlassCard from "@/components/GlassCard";
+import { Fonts } from "@/constants/fonts";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Notification, useApp } from "@/context/AppContext";
@@ -44,84 +46,66 @@ function NotifItem({
 }) {
   const cfg = TYPE_CONFIG[notif.type] || TYPE_CONFIG.reminder;
   return (
-    <TouchableOpacity
-      style={[
-        {
-          backgroundColor: colors.card,
-          borderRadius: 14,
-          padding: 16,
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: 14,
-          marginBottom: 10,
-          position: "relative",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.06,
-          shadowRadius: 4,
-          elevation: 2,
-        },
-        !notif.read && {
-          borderLeftWidth: 3,
-          borderLeftColor: colors.primary,
-        },
-      ]}
-      onPress={onPress}
-      activeOpacity={0.85}
-    >
-      {!notif.read && (
-        <View
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            width: 8,
-            height: 8,
-            borderRadius: 4,
-            backgroundColor: colors.primary,
-          }}
-        />
-      )}
-      <View
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: 12,
-          backgroundColor: cfg.bg,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Feather name={cfg.icon as any} size={20} color={cfg.color} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 8,
-            marginBottom: 4,
-          }}
-        >
-          <Text
-            style={{ flex: 1, fontSize: 14, fontWeight: "700", color: colors.text }}
-            numberOfLines={1}
-          >
-            {notif.title}
-          </Text>
-          <Text style={{ fontSize: 11, color: colors.textMuted }}>
-            {timeAgo(notif.timestamp)}
-          </Text>
-        </View>
-        <Text
-          style={{ fontSize: 13, color: colors.textSecondary, lineHeight: 18 }}
-          numberOfLines={2}
-        >
-          {notif.body}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    <View style={{ marginBottom: 10 }}>
+      <GlassCard glowColor={notif.read ? colors.glassBorder : cfg.color} borderRadius={14}>
+        <TouchableOpacity onPress={onPress} activeOpacity={0.85}>
+          <View style={{ padding: 16, flexDirection: "row", alignItems: "flex-start", gap: 14, position: "relative" }}>
+            {!notif.read && (
+              <View
+                style={{
+                  position: "absolute",
+                  top: 16,
+                  right: 16,
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: cfg.color,
+                }}
+              />
+            )}
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                backgroundColor: cfg.bg,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Feather name={cfg.icon as any} size={20} color={cfg.color} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  marginBottom: 4,
+                }}
+              >
+                <Text
+                  style={{ flex: 1, fontFamily: Fonts.bold, fontSize: 14, color: colors.text, letterSpacing: -0.2 }}
+                  numberOfLines={1}
+                >
+                  {notif.title}
+                </Text>
+                <Text style={{ fontFamily: Fonts.medium, fontSize: 11, color: colors.textMuted }}>
+                  {timeAgo(notif.timestamp)}
+                </Text>
+              </View>
+              <Text
+                style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary, lineHeight: 18 }}
+                numberOfLines={2}
+              >
+                {notif.body}
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </GlassCard>
+    </View>
   );
 }
 
@@ -159,12 +143,12 @@ export default function NotificationsScreen() {
         >
           <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
-        <Text style={{ flex: 1, fontSize: 22, fontWeight: "800", color: colors.text }}>
+        <Text style={{ flex: 1, fontFamily: Fonts.extrabold, fontSize: 22, color: colors.text, letterSpacing: -0.5 }}>
           {t('notificationsTitle')}
         </Text>
         {unreadCount > 0 && (
           <TouchableOpacity onPress={markAllNotificationsRead}>
-            <Text style={{ fontSize: 14, color: colors.primary, fontWeight: "600" }}>
+            <Text style={{ fontFamily: Fonts.bold, fontSize: 14, color: colors.primary }}>
               {t('markAllRead')}
             </Text>
           </TouchableOpacity>
@@ -193,11 +177,12 @@ export default function NotificationsScreen() {
             }}
           >
             <Feather name="bell-off" size={48} color={colors.textMuted} />
-            <Text style={{ fontSize: 20, fontWeight: "700", color: colors.text }}>
+            <Text style={{ fontFamily: Fonts.extrabold, fontSize: 20, color: colors.text, letterSpacing: -0.4 }}>
               {t('noNotifications')}
             </Text>
             <Text
               style={{
+                fontFamily: Fonts.medium,
                 fontSize: 14,
                 color: colors.textSecondary,
                 textAlign: "center",

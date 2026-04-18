@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useLanguage } from '../context/LanguageContext'
+import ProgressBar from '../components/ui/progress-bar'
 
 interface BloodRequest {
   id: string
@@ -19,6 +20,7 @@ const STATUS_OPTIONS = ['open', 'in_progress', 'fulfilled', 'closed']
 export default function Requests() {
   const { t } = useLanguage()
   const [requests, setRequests] = useState<BloodRequest[]>([])
+  const [fulfilled, setFulfilled] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [clearing, setClearing] = useState(false)
 
@@ -32,7 +34,26 @@ export default function Requests() {
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (!error && data) setRequests(data)
+    if (!error && data) {
+      setRequests(data)
+      const ids = data.map(r => r.id)
+      if (ids.length > 0) {
+        const { data: records } = await supabase
+          .from('donation_records')
+          .select('units, appointments!inner(request_id)')
+          .in('appointments.request_id', ids)
+        if (records) {
+          const totals: Record<string, number> = {}
+          for (const rec of records as Array<{ units: number; appointments: { request_id: string } | { request_id: string }[] }>) {
+            const appt = Array.isArray(rec.appointments) ? rec.appointments[0] : rec.appointments
+            if (appt?.request_id) {
+              totals[appt.request_id] = (totals[appt.request_id] || 0) + (rec.units || 0)
+            }
+          }
+          setFulfilled(totals)
+        }
+      }
+    }
     setLoading(false)
   }
 
@@ -144,6 +165,17 @@ export default function Requests() {
                   {req.notes && <p className="mt-1 italic">{req.notes}</p>}
                 </div>
               )}
+
+              <div className="mb-4">
+                <ProgressBar
+                  current={fulfilled[req.id] || 0}
+                  target={req.units_needed}
+                  label={t('fulfilled')}
+                  unit={t('unitsShort')}
+                  tone={req.urgency === 'critical' ? 'error' : req.urgency === 'urgent' ? 'primary' : 'secondary'}
+                  compact
+                />
+              </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-xs text-on-surface-variant mr-2">{t('updateStatus')}</span>

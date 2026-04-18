@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useTheme, type ThemeMode } from '../context/ThemeContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -9,12 +9,15 @@ const NAV_ITEMS = [
   { to: '/create-request', labelKey: 'createRequest', icon: 'add_circle' },
   { to: '/appointments', labelKey: 'appointments', icon: 'calendar_month' },
   { to: '/requests', labelKey: 'requests', icon: 'list_alt' },
+  { to: '/campaigns', labelKey: 'campaigns', icon: 'campaign' },
   { to: '/ai-outputs', labelKey: 'aiInsights', icon: 'psychology' },
+  { to: '/blood-map', labelKey: 'bloodMap', icon: 'map' },
 ]
 
 const ADMIN_ITEMS = [
-  { to: '/admin/users', labelKey: 'userManagement', icon: 'manage_accounts' },
-  { to: '/admin/settings', labelKey: 'systemSettings', icon: 'settings' },
+  { to: '/admin/users', labelKey: 'userManagement', icon: 'manage_accounts', adminOnly: true },
+  { to: '/admin/settings', labelKey: 'systemSettings', icon: 'settings', adminOnly: false },
+  { to: '/profile', labelKey: 'editProfile', icon: 'person', adminOnly: false },
 ]
 
 const THEME_OPTIONS: { mode: ThemeMode; labelKey: string; icon: string }[] = [
@@ -25,16 +28,39 @@ const THEME_OPTIONS: { mode: ThemeMode; labelKey: string; icon: string }[] = [
 
 export default function Layout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { themeMode, setThemeMode } = useTheme()
   const { lang, setLang, t } = useLanguage()
-  const [collapsed, setCollapsed] = useState(() => {
-    return localStorage.getItem('sidebarCollapsed') === 'true'
+  const [role, setRole] = useState<'admin' | 'staff' | 'donor' | null>(null)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('users').select('role').eq('auth_id', user.id).maybeSingle()
+      if (active && data?.role) setRole(data.role as 'admin' | 'staff' | 'donor')
+    })()
+    return () => { active = false }
+  }, [])
+
+  const isAdmin = role === 'admin'
+  const visibleAdminItems = ADMIN_ITEMS.filter(item => isAdmin || !item.adminOnly)
+  const sectionLabelKey = isAdmin ? 'adminLabel' : 'staffLabel'
+
+  // Blood Map uses full viewport — skip inner padding & max-width wrapper
+  const fullBleed = location.pathname.startsWith('/blood-map')
+
+  // Simple show/hide sidebar — click to toggle, no hover behavior
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    return localStorage.getItem('sidebarOpen') !== 'false'
   })
+  const collapsed = !sidebarOpen
 
   const toggleSidebar = () => {
-    const next = !collapsed
-    setCollapsed(next)
-    localStorage.setItem('sidebarCollapsed', String(next))
+    const next = !sidebarOpen
+    setSidebarOpen(next)
+    localStorage.setItem('sidebarOpen', String(next))
   }
 
   const handleSignOut = async () => {
@@ -42,50 +68,64 @@ export default function Layout() {
     navigate('/login')
   }
 
-  const isRTL = lang === 'ar'
 
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className={`relative flex-shrink-0 bg-surface border-r border-outline flex flex-col transition-all duration-300 overflow-hidden ${collapsed ? 'w-16' : 'w-60'}`}>
+      <aside
+        className={`flex-shrink-0 bg-surface border-r border-outline flex flex-col transition-all duration-300 overflow-hidden ${collapsed ? 'w-16' : 'w-60'}`}
+      >
 
-        {/* Toggle button */}
-        <button
-          onClick={toggleSidebar}
-          title={collapsed ? t('expandSidebar') : t('collapseSidebar')}
-          className="absolute -end-3 top-7 z-50 w-6 h-6 rounded-full bg-surface-container border border-outline flex items-center justify-center hover:bg-surface-container-high transition-all cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '14px' }}>
-            {collapsed
-              ? (isRTL ? 'chevron_left' : 'chevron_right')
-              : (isRTL ? 'chevron_right' : 'chevron_left')
-            }
-          </span>
-        </button>
-
-        {/* Logo */}
+        {/* Logo + collapse toggle */}
         <div className={`py-5 border-b border-outline ${collapsed ? 'px-3' : 'px-5'}`}>
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div
-              className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
-            >
-              <span
-                className="material-symbols-outlined text-on-primary"
-                style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}
+            {collapsed ? (
+              /* Collapsed: logo icon doubles as expand button */
+              <button
+                onClick={toggleSidebar}
+                title={t('lockSidebar')}
+                className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
               >
-                water_drop
-              </span>
-            </div>
-            {!collapsed && (
-              <div>
-                <h1 className="font-headline font-bold text-base text-on-surface tracking-tight leading-tight whitespace-nowrap">
-                  Damk 3alena
-                </h1>
-                <p className="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
-                  Blood Dashboard
-                </p>
-              </div>
+                <span
+                  className="material-symbols-outlined text-on-primary"
+                  style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}
+                >
+                  water_drop
+                </span>
+              </button>
+            ) : (
+              /* Expanded: logo + title + collapse arrow */
+              <>
+                <div
+                  className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
+                >
+                  <span
+                    className="material-symbols-outlined text-on-primary"
+                    style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}
+                  >
+                    water_drop
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h1 className="font-headline font-bold text-base text-on-surface tracking-tight leading-tight whitespace-nowrap">
+                    Damk 3alena
+                  </h1>
+                  <p className="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    Blood Dashboard
+                  </p>
+                </div>
+                <button
+                  onClick={toggleSidebar}
+                  title={t('unlockSidebar')}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary hover:bg-primary hover:text-on-primary transition-all duration-200 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                    left_panel_close
+                  </span>
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -114,13 +154,13 @@ export default function Layout() {
           {!collapsed && (
             <div className="pt-5 pb-1.5 px-3">
               <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest">
-                {t('adminLabel')}
+                {t(sectionLabelKey)}
               </p>
             </div>
           )}
           {collapsed && <div className="pt-3" />}
 
-          {ADMIN_ITEMS.map(item => (
+          {visibleAdminItems.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -238,10 +278,14 @@ export default function Layout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto min-h-screen">
-        <div className="p-8 max-w-6xl">
+      <main className={`flex-1 min-h-screen ${fullBleed ? 'overflow-hidden relative' : 'overflow-y-auto'}`}>
+        {fullBleed ? (
           <Outlet />
-        </div>
+        ) : (
+          <div className="p-8 max-w-6xl">
+            <Outlet />
+          </div>
+        )}
       </main>
     </div>
   )

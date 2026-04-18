@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import GlassCard from "@/components/GlassCard";
+import { Fonts } from "@/constants/fonts";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { Donation, useApp } from "@/context/AppContext";
@@ -42,27 +44,32 @@ function DonationHistoryItem({ item, isLast, colors }: { item: Donation; isLast:
         <Feather name="droplet" size={18} color={bloodColor} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text, marginBottom: 2 }} numberOfLines={1}>{item.hospitalName}</Text>
-        <Text style={{ fontSize: 12, color: colors.textSecondary }}>{item.hospitalCity}</Text>
+        <Text style={{ fontFamily: Fonts.bold, fontSize: 14, color: colors.text, marginBottom: 2 }} numberOfLines={1}>{item.hospitalName}</Text>
+        <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textSecondary }}>{item.hospitalCity}</Text>
       </View>
       <View style={{ alignItems: "flex-end", gap: 4 }}>
         <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: bloodColor }}>
-          <Text style={{ fontSize: 12, fontWeight: "800", color: "#fff" }}>{item.bloodType}</Text>
+          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 12, color: "#fff", letterSpacing: -0.2 }}>{item.bloodType}</Text>
         </View>
-        <Text style={{ fontSize: 12, color: colors.textMuted }}>{formatDate(item.date)}</Text>
+        <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textMuted }}>{formatDate(item.date)}</Text>
       </View>
     </View>
   );
 }
 
-function StatCard({ label, value, icon, color, colors }: { label: string; value: string; icon: string; color: string; colors: any }) {
+function StatCard({ label, value, icon, color }: { label: string; value: string; icon: string; color: string; colors: any }) {
+  const { colors: themeColors } = useTheme();
   return (
-    <View style={{ flex: 1, backgroundColor: colors.card, borderRadius: 16, padding: 12, alignItems: "center", gap: 6, borderTopWidth: 3, borderTopColor: color, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, borderWidth: 1, borderColor: colors.separator }}>
-      <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: color + "20", alignItems: "center", justifyContent: "center" }}>
-        <Feather name={icon as any} size={18} color={color} />
-      </View>
-      <Text style={{ fontSize: 13, fontWeight: "800", color: colors.text, textAlign: "center" }} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
-      <Text style={{ fontSize: 9, color: colors.textMuted, fontWeight: "600", textTransform: "uppercase", textAlign: "center", letterSpacing: 0.3 }}>{label}</Text>
+    <View style={{ flex: 1 }}>
+      <GlassCard glowColor={color} borderRadius={16}>
+        <View style={{ padding: 12, alignItems: "center", gap: 6 }}>
+          <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: color + "20", alignItems: "center", justifyContent: "center" }}>
+            <Feather name={icon as any} size={18} color={color} />
+          </View>
+          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 13, color: themeColors.text, textAlign: "center", letterSpacing: -0.2 }} numberOfLines={2} adjustsFontSizeToFit>{value}</Text>
+          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 9, color: themeColors.textMuted, textTransform: "uppercase", textAlign: "center", letterSpacing: 0.8 }}>{label}</Text>
+        </View>
+      </GlassCard>
     </View>
   );
 }
@@ -106,7 +113,7 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, marginBottom: 20 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: colors.text, letterSpacing: -0.5 }}>{t('profile')}</Text>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 28, color: colors.text, letterSpacing: -0.7 }}>{t('profile')}</Text>
         <TouchableOpacity
           style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: colors.card, alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 }}
           onPress={() => router.push("/settings")}
@@ -115,53 +122,57 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={{ marginHorizontal: 20, backgroundColor: colors.card, borderRadius: 24, padding: 24, alignItems: "center", marginBottom: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 16, elevation: 5, borderWidth: 1, borderColor: colors.separator }}>
-        <View style={{ position: "relative", marginBottom: 14 }}>
-          <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: bloodColor, alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5 }}>
-            <Text style={{ fontSize: 28, fontWeight: "900", color: "#fff" }}>{profile?.avatarInitials || "??"}</Text>
-          </View>
-          <View style={{ position: "absolute", bottom: -6, right: -6, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 2, borderColor: colors.card, backgroundColor: bloodColor }}>
-            <Text style={{ fontSize: 12, fontWeight: "800", color: "#fff" }}>{profile?.bloodType || "--"}</Text>
-          </View>
-        </View>
-        <Text style={{ fontSize: 22, fontWeight: "800", color: colors.text, marginBottom: 4 }}>{profile?.name || "Donor"}</Text>
-        <Text style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 8 }}>{profile?.phone || ""}</Text>
-        {profile?.city && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 8 }}>
-            <Feather name="map-pin" size={13} color={colors.textMuted} />
-            <Text style={{ fontSize: 13, color: colors.textMuted }}>{profile.city}</Text>
-          </View>
-        )}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <Feather name="user" size={12} color={colors.textMuted} />
-            <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: "500" }}>
-              {profile?.gender === "male" ? t('male') : profile?.gender === "female" ? t('female') : "—"}
-            </Text>
-          </View>
-          {profile?.dateOfBirth && (
-            <>
-              <View style={{ width: 1, height: 14, backgroundColor: colors.separator }} />
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                <Feather name="calendar" size={12} color={colors.textMuted} />
-                <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: "500" }}>{profile.dateOfBirth}</Text>
+      <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
+        <GlassCard glowColor={bloodColor} borderRadius={24}>
+          <View style={{ padding: 24, alignItems: "center" }}>
+            <View style={{ position: "relative", marginBottom: 14 }}>
+              <View style={{ width: 80, height: 80, borderRadius: 24, backgroundColor: bloodColor, alignItems: "center", justifyContent: "center", shadowColor: bloodColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 10, elevation: 5 }}>
+                <Text style={{ fontFamily: Fonts.extrabold, fontSize: 28, color: "#fff", letterSpacing: -0.8 }}>{profile?.avatarInitials || "??"}</Text>
               </View>
-            </>
-          )}
-          {profile?.weightKg && (
-            <>
-              <View style={{ width: 1, height: 14, backgroundColor: colors.separator }} />
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-                <Feather name="activity" size={12} color={colors.textMuted} />
-                <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: "500" }}>{profile.weightKg} kg</Text>
+              <View style={{ position: "absolute", bottom: -6, right: -6, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 2, borderColor: colors.card, backgroundColor: bloodColor }}>
+                <Text style={{ fontFamily: Fonts.extrabold, fontSize: 12, color: "#fff", letterSpacing: -0.2 }}>{profile?.bloodType || "--"}</Text>
               </View>
-            </>
-          )}
-        </View>
+            </View>
+            <Text style={{ fontFamily: Fonts.extrabold, fontSize: 22, color: colors.text, marginBottom: 4, letterSpacing: -0.4 }}>{profile?.name || "Donor"}</Text>
+            <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, marginBottom: 8 }}>{profile?.phone || ""}</Text>
+            {profile?.city && (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 8 }}>
+                <Feather name="map-pin" size={13} color={colors.textMuted} />
+                <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textMuted }}>{profile.city}</Text>
+              </View>
+            )}
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Feather name="user" size={12} color={colors.textMuted} />
+                <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textMuted }}>
+                  {profile?.gender === "male" ? t('male') : profile?.gender === "female" ? t('female') : "—"}
+                </Text>
+              </View>
+              {profile?.dateOfBirth && (
+                <>
+                  <View style={{ width: 1, height: 14, backgroundColor: colors.separator }} />
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                    <Feather name="calendar" size={12} color={colors.textMuted} />
+                    <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textMuted }}>{profile.dateOfBirth}</Text>
+                  </View>
+                </>
+              )}
+              {profile?.weightKg && (
+                <>
+                  <View style={{ width: 1, height: 14, backgroundColor: colors.separator }} />
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                    <Feather name="activity" size={12} color={colors.textMuted} />
+                    <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textMuted }}>{profile.weightKg} kg</Text>
+                  </View>
+                </>
+              )}
+            </View>
+          </View>
+        </GlassCard>
       </View>
 
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-        <Text style={{ fontSize: 11, fontWeight: "700", color: colors.textMuted, letterSpacing: 0.8, marginBottom: 12 }}>{t('donationStats')}</Text>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, letterSpacing: 1.4, marginBottom: 12, textTransform: "uppercase" }}>{t('donationStats')}</Text>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <StatCard label={t('totalDonations')} value={totalDonations.toString()} icon="droplet" color={colors.primary} colors={colors} />
           <StatCard label={t('lastDonationStat')} value={lastDonationDate ? formatDate(lastDonationDate) : t('noneYet')} icon="calendar" color="#7C3AED" colors={colors} />
@@ -171,63 +182,70 @@ export default function ProfileScreen() {
 
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <Text style={{ fontSize: 11, fontWeight: "700", color: colors.textMuted, letterSpacing: 0.8 }}>{t('donationHistory')}</Text>
+          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, letterSpacing: 1.4, textTransform: "uppercase" }}>{t('donationHistory')}</Text>
           {completedDonations.length > 0 && (
             <View style={{ backgroundColor: "#FEF2F2", borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 }}>
-              <Text style={{ fontSize: 12, fontWeight: "700", color: colors.primary }}>{completedDonations.length} {t('donations')}</Text>
+              <Text style={{ fontFamily: Fonts.bold, fontSize: 12, color: colors.primary }}>{completedDonations.length} {t('donations')}</Text>
             </View>
           )}
         </View>
 
         {completedDonations.length === 0 ? (
-          <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 32, alignItems: "center", gap: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, borderWidth: 1, borderColor: colors.separator }}>
-            <View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: colors.inputBg, alignItems: "center", justifyContent: "center" }}>
-              <Feather name="droplet" size={28} color={colors.textMuted} />
+          <GlassCard glowColor={colors.primary} borderRadius={20}>
+            <View style={{ padding: 32, alignItems: "center", gap: 10 }}>
+              <View style={{ width: 64, height: 64, borderRadius: 20, backgroundColor: colors.inputBg, alignItems: "center", justifyContent: "center" }}>
+                <Feather name="droplet" size={28} color={colors.textMuted} />
+              </View>
+              <Text style={{ fontFamily: Fonts.extrabold, fontSize: 17, color: colors.text, letterSpacing: -0.3 }}>{t('noDonationsTitle')}</Text>
+              <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary, textAlign: "center" }}>{t('noDonationsDesc')}</Text>
+              <TouchableOpacity
+                style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 14, marginTop: 8 }}
+                onPress={() => router.push("/(tabs)/maps")} activeOpacity={0.85}
+              >
+                <Feather name="map-pin" size={16} color="#fff" />
+                <Text style={{ fontFamily: Fonts.bold, fontSize: 14, color: "#fff", letterSpacing: 0.2 }}>{t('findHospitalBtn')}</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text }}>{t('noDonationsTitle')}</Text>
-            <Text style={{ fontSize: 13, color: colors.textSecondary, textAlign: "center" }}>{t('noDonationsDesc')}</Text>
-            <TouchableOpacity
-              style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 14, marginTop: 8 }}
-              onPress={() => router.push("/(tabs)/maps")} activeOpacity={0.85}
-            >
-              <Feather name="map-pin" size={16} color="#fff" />
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#fff" }}>{t('findHospitalBtn')}</Text>
-            </TouchableOpacity>
-          </View>
+          </GlassCard>
         ) : (
-          <View style={{ backgroundColor: colors.card, borderRadius: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: colors.separator, overflow: "hidden" }}>
-            {completedDonations.map((d, i) => (
-              <DonationHistoryItem key={d.id} item={d} isLast={i === completedDonations.length - 1} colors={colors} />
-            ))}
-          </View>
+          <GlassCard glowColor={colors.primary} borderRadius={20}>
+            <View>
+              {completedDonations.map((d, i) => (
+                <DonationHistoryItem key={d.id} item={d} isLast={i === completedDonations.length - 1} colors={colors} />
+              ))}
+            </View>
+          </GlassCard>
         )}
       </View>
 
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-        <Text style={{ fontSize: 11, fontWeight: "700", color: colors.textMuted, letterSpacing: 0.8, marginBottom: 12 }}>{t('quickActions')}</Text>
-        <View style={{ backgroundColor: colors.card, borderRadius: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 3, borderWidth: 1, borderColor: colors.separator, overflow: "hidden" }}>
-          {[
-            { icon: "map", labelKey: "findHospitalBtn", onPress: () => router.push("/(tabs)/maps") },
-            { icon: "alert-triangle", labelKey: "urgentRequests", onPress: () => router.push("/(tabs)/urgent") },
-            { icon: "bell", labelKey: "notifications", onPress: () => router.push("/notifications") },
-            { icon: "settings", labelKey: "settings", onPress: () => router.push("/settings") },
-          ].map((a, i, arr) => (
-            <React.Fragment key={a.labelKey}>
-              <TouchableOpacity
-                style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
-                onPress={() => { Haptics.selectionAsync(); a.onPress(); }}
-                activeOpacity={0.75}
-              >
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "10", alignItems: "center", justifyContent: "center" }}>
-                  <Feather name={a.icon as any} size={18} color={colors.primary} />
-                </View>
-                <Text style={{ flex: 1, fontSize: 15, fontWeight: "600", color: colors.text }}>{t(a.labelKey)}</Text>
-                <Feather name="chevron-right" size={18} color={colors.textMuted} />
-              </TouchableOpacity>
-              {i < arr.length - 1 && <View style={{ height: 1, backgroundColor: colors.separator, marginLeft: 70 }} />}
-            </React.Fragment>
-          ))}
-        </View>
+        <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, letterSpacing: 1.4, marginBottom: 12, textTransform: "uppercase" }}>{t('quickActions')}</Text>
+        <GlassCard glowColor={colors.primary} borderRadius={20}>
+          <View>
+            {[
+              { icon: "map", labelKey: "findHospitalBtn", onPress: () => router.push("/(tabs)/maps") },
+              { icon: "alert-triangle", labelKey: "urgentRequests", onPress: () => router.push("/(tabs)/urgent") },
+              { icon: "calendar", labelKey: "myCampaigns", onPress: () => router.push("/my-campaigns") },
+              { icon: "bell", labelKey: "notifications", onPress: () => router.push("/notifications") },
+              { icon: "settings", labelKey: "settings", onPress: () => router.push("/settings") },
+            ].map((a, i, arr) => (
+              <React.Fragment key={a.labelKey}>
+                <TouchableOpacity
+                  style={{ flexDirection: "row", alignItems: "center", gap: 14, padding: 16 }}
+                  onPress={() => { Haptics.selectionAsync(); a.onPress(); }}
+                  activeOpacity={0.75}
+                >
+                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.primary + "10", alignItems: "center", justifyContent: "center" }}>
+                    <Feather name={a.icon as any} size={18} color={colors.primary} />
+                  </View>
+                  <Text style={{ flex: 1, fontFamily: Fonts.semibold, fontSize: 15, color: colors.text }}>{t(a.labelKey) || a.labelKey}</Text>
+                  <Feather name="chevron-right" size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+                {i < arr.length - 1 && <View style={{ height: 1, backgroundColor: colors.separator, marginLeft: 70 }} />}
+              </React.Fragment>
+            ))}
+          </View>
+        </GlassCard>
       </View>
 
       <View style={{ paddingHorizontal: 20 }}>
@@ -236,7 +254,7 @@ export default function ProfileScreen() {
           onPress={handleLogout} activeOpacity={0.8}
         >
           <Feather name="log-out" size={18} color={colors.primary} />
-          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.primary }}>{t('signOut')}</Text>
+          <Text style={{ fontFamily: Fonts.bold, fontSize: 16, color: colors.primary, letterSpacing: 0.2 }}>{t('signOut')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

@@ -14,6 +14,8 @@ import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/lib/supabase";
+import { canDonate } from "@/lib/bloodCompatibility";
+import type { BloodType } from "@/context/AppContext";
 
 type UrgencyLevel = "critical" | "urgent" | "normal" | "pending";
 
@@ -52,10 +54,11 @@ function timeAgo(isoDate: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
-function UrgentCaseCard({ item, colors }: { item: BloodRequest; colors: any }) {
+function UrgentCaseCard({ item, colors, donorType }: { item: BloodRequest; colors: any; donorType: BloodType | null }) {
   const { t } = useLanguage();
   const cfg = URGENCY_CONFIG[item.urgency] || URGENCY_CONFIG.normal;
   const bloodColor = BLOOD_COLORS[item.bloodType] || "#E11D48";
+  const compatible = canDonate(donorType, item.bloodType);
 
   return (
     <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: colors.separator, borderLeftWidth: 4, borderLeftColor: cfg.color }}>
@@ -92,18 +95,30 @@ function UrgentCaseCard({ item, colors }: { item: BloodRequest; colors: any }) {
         </View>
       </View>
 
+      {!compatible && donorType && (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#FEF3C7", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12, borderWidth: 1, borderColor: "#F59E0B" + "55" }}>
+          <Feather name="alert-triangle" size={14} color="#92400E" />
+          <Text style={{ flex: 1, fontSize: 11.5, fontWeight: "600", color: "#78350F", lineHeight: 15 }}>
+            Your {donorType} blood can't donate to {item.bloodType}
+          </Text>
+        </View>
+      )}
+
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Feather name="droplet" size={13} color={bloodColor} />
           <Text style={{ fontSize: 13, fontWeight: "700", color: bloodColor }}>{item.unitsNeeded} {t('unitsNeeded')}</Text>
         </View>
         <TouchableOpacity
-          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: cfg.color }}
+          disabled={!compatible}
+          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: compatible ? cfg.color : colors.inputBorder, opacity: compatible ? 1 : 0.7 }}
           onPress={() => router.push({ pathname: "/appointment/book", params: { hospitalId: item.hospitalId } })}
           activeOpacity={0.85}
         >
-          <Text style={{ fontSize: 13, fontWeight: "700", color: "#fff" }}>{t('donateNow')}</Text>
-          <Feather name="arrow-right" size={14} color="#fff" />
+          <Text style={{ fontSize: 13, fontWeight: "700", color: compatible ? "#fff" : colors.textMuted }}>
+            {compatible ? t('donateNow') : "Not compatible"}
+          </Text>
+          {compatible && <Feather name="arrow-right" size={14} color="#fff" />}
         </TouchableOpacity>
       </View>
     </View>
@@ -113,6 +128,8 @@ function UrgentCaseCard({ item, colors }: { item: BloodRequest; colors: any }) {
 export default function UrgentScreen() {
   const { colors } = useTheme();
   const { t } = useLanguage();
+  const { profile } = useApp();
+  const donorType = profile?.bloodType ?? null;
   const insets = useSafeAreaInsets();
   const [filter, setFilter] = useState<"all" | UrgencyLevel>("all");
   const [requests, setRequests] = useState<BloodRequest[]>([]);
@@ -254,7 +271,7 @@ export default function UrgentScreen() {
         }
         renderItem={({ item }) => (
           <View style={{ paddingHorizontal: 20, marginBottom: 14 }}>
-            <UrgentCaseCard item={item} colors={colors} />
+            <UrgentCaseCard item={item} colors={colors} donorType={donorType} />
           </View>
         )}
         ListEmptyComponent={

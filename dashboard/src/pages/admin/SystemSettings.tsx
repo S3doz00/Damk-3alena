@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useLanguage } from '../../context/LanguageContext'
+import { InfoPopover } from '@/components/ui/info-popover'
 
 interface SystemParam {
   id: string
@@ -17,11 +18,21 @@ export default function SystemSettings() {
   const [aiRunning, setAiRunning] = useState(false)
   const [aiMessage, setAiMessage] = useState('')
   const [serviceStatus, setServiceStatus] = useState<'checking' | 'online' | 'offline'>('checking')
+  const [currentRole, setCurrentRole] = useState<string | null>(null)
 
   useEffect(() => {
     loadParams()
     checkAIService()
+    ;(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase.from('users').select('role').eq('auth_id', user.id).maybeSingle()
+      if (data?.role) setCurrentRole(data.role)
+    })()
   }, [])
+
+  const isAdmin = currentRole === 'admin'
+  const STAFF_LOCKED_KEYS = new Set(['eligibility_days', 'eligibility_gap_days'])
 
   async function checkAIService() {
     const aiServiceUrl = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8000'
@@ -332,6 +343,73 @@ export default function SystemSettings() {
     min_weight_kg:               'monitor_weight',
   }
 
+  const extendedParamInfo: Record<string, { en: string; ar: string }> = {
+    shortage_threshold_critical: {
+      en: 'If too low: shortages go undetected until stock is depleted. If too high: false alarms that desensitize staff.\nRecommended: 3–8 units.\nAffects: Blood Map critical markers, AI Insights critical alerts.',
+      ar: 'إذا كان منخفضًا جدًا: لن يُكتشف النقص حتى نفاد المخزون. إذا كان مرتفعًا جدًا: تنبيهات كاذبة تقلل يقظة الطاقم.\nالموصى: 3–8 وحدات.\nيؤثر على: علامات خريطة الدم الحرجة، تنبيهات الذكاء الاصطناعي الحرجة.',
+    },
+    shortage_threshold_warning: {
+      en: 'If too low: warnings come too late to act. If too high: staff get overwhelmed with alerts.\nRecommended: 10–20 units.\nAffects: Blood Map warning markers, Supply Warnings in AI Insights.',
+      ar: 'إذا كان منخفضًا جدًا: التحذيرات تأتي متأخرة. إذا كان مرتفعًا جدًا: كثرة التنبيهات ترهق الطاقم.\nالموصى: 10–20 وحدة.\nيؤثر على: علامات التحذير في خريطة الدم، تحذيرات المخزون في تحليلات الذكاء الاصطناعي.',
+    },
+    shortage_threshold_units: {
+      en: 'General threshold for triggering shortage alerts across the system.\nRecommended: 5–15 units.\nAffects: Shortage detection AI module.',
+      ar: 'حد عام لتفعيل تنبيهات النقص في النظام.\nالموصى: 5–15 وحدة.\nيؤثر على: وحدة اكتشاف النقص بالذكاء الاصطناعي.',
+    },
+    eligibility_days: {
+      en: 'Safety cooldown between donations. Too short: health risk. Too long: reduces available donors.\nRecommended: 56–90 days.\nAffects: Donor eligibility checks, appointment booking.',
+      ar: 'فترة أمان بين التبرعات. قصيرة جدًا: خطر صحي. طويلة جدًا: تقلل المتبرعين المتاحين.\nالموصى: 56–90 يومًا.\nيؤثر على: فحوصات أهلية المتبرع، حجز المواعيد.',
+    },
+    eligibility_gap_days: {
+      en: 'Same as eligibility days — minimum gap between donations.\nRecommended: 56–90 days.\nAffects: Donor eligibility, mobile app cooldown display.',
+      ar: 'مثل أيام الأهلية — الحد الأدنى للفجوة بين التبرعات.\nالموصى: 56–90 يومًا.\nيؤثر على: أهلية المتبرع، شاشة الانتظار في التطبيق.',
+    },
+    donation_interval_days: {
+      en: 'Minimum days between donations for health compliance.\nRecommended: 56–90 days.\nAffects: Donor eligibility calculations.',
+      ar: 'الحد الأدنى للأيام بين التبرعات للامتثال الصحي.\nالموصى: 56–90 يومًا.\nيؤثر على: حسابات أهلية المتبرع.',
+    },
+    notification_radius_km: {
+      en: 'How far to search for eligible donors. Too small: misses donors. Too large: donors too far to respond.\nRecommended: 15–50 km.\nAffects: AI donor recommendation engine, push notifications.',
+      ar: 'مدى البحث عن متبرعين مؤهلين. صغير جدًا: يفوت متبرعين. كبير جدًا: المتبرعون بعيدون جدًا.\nالموصى: 15–50 كم.\nيؤثر على: محرك توصيات المتبرعين، الإشعارات.',
+    },
+    forecast_horizon_weeks: {
+      en: 'How many weeks ahead the AI predicts demand. More weeks = less accuracy.\nRecommended: 2–6 weeks.\nAffects: AI forecast chart, shortage prediction accuracy.',
+      ar: 'عدد الأسابيع التي يتنبأ بها الذكاء الاصطناعي. أسابيع أكثر = دقة أقل.\nالموصى: 2–6 أسابيع.\nيؤثر على: مخطط التوقعات، دقة التنبؤ بالنقص.',
+    },
+    max_appointments_per_day: {
+      en: 'Prevents overbooking. Too low: wasted capacity. Too high: long queues.\nRecommended: 10–50 per day.\nAffects: Appointment booking availability in mobile app.',
+      ar: 'يمنع الحجز الزائد. منخفض جدًا: سعة مهدرة. مرتفع جدًا: طوابير طويلة.\nالموصى: 10–50 يوميًا.\nيؤثر على: توفر حجز المواعيد في التطبيق.',
+    },
+    appointment_slot_minutes: {
+      en: 'Duration of each donation slot. Too short: rushed process. Too long: fewer donors per day.\nRecommended: 15–45 minutes.\nAffects: Appointment time slots in mobile app.',
+      ar: 'مدة كل موعد تبرع. قصير جدًا: عملية مستعجلة. طويل جدًا: متبرعون أقل يوميًا.\nالموصى: 15–45 دقيقة.\nيؤثر على: فتحات المواعيد في التطبيق.',
+    },
+    min_inventory_units: {
+      en: 'Safety buffer to always keep in stock. Too low: risky. Too high: overstock.\nRecommended: 5–20 units.\nAffects: Shortage alert thresholds, inventory monitoring.',
+      ar: 'مخزون أمان يُحفظ دائمًا. منخفض جدًا: خطر. مرتفع جدًا: مخزون زائد.\nالموصى: 5–20 وحدة.\nيؤثر على: حدود تنبيهات النقص، مراقبة المخزون.',
+    },
+    recommendation_top_n: {
+      en: 'Number of donors shown in recommendations. Too few: may miss good matches. Too many: information overload.\nRecommended: 5–15 donors.\nAffects: AI donor recommendation results.',
+      ar: 'عدد المتبرعين المعروضين في التوصيات. قليل جدًا: قد يفوت متبرعين مناسبين. كثير جدًا: معلومات مفرطة.\nالموصى: 5–15 متبرعًا.\nيؤثر على: نتائج توصيات المتبرعين.',
+    },
+    ai_confidence_threshold: {
+      en: 'Minimum confidence % to show AI predictions. Too low: unreliable results. Too high: hides useful predictions.\nRecommended: 50–80%.\nAffects: Which AI forecasts and alerts are displayed.',
+      ar: 'الحد الأدنى لنسبة الثقة لعرض التوقعات. منخفض جدًا: نتائج غير موثوقة. مرتفع جدًا: يخفي توقعات مفيدة.\nالموصى: 50–80%.\nيؤثر على: التوقعات والتنبيهات المعروضة.',
+    },
+    max_age_years: {
+      en: 'Upper age limit for donor eligibility. Based on health guidelines.\nRecommended: 60–65 years.\nAffects: Donor eligibility checks.',
+      ar: 'الحد الأقصى لعمر المتبرع. بناءً على الإرشادات الصحية.\nالموصى: 60–65 سنة.\nيؤثر على: فحوصات أهلية المتبرع.',
+    },
+    min_age_years: {
+      en: 'Minimum age for donor eligibility. Must comply with regulations.\nRecommended: 17–18 years.\nAffects: Donor eligibility checks.',
+      ar: 'الحد الأدنى لعمر المتبرع. يجب الامتثال للأنظمة.\nالموصى: 17–18 سنة.\nيؤثر على: فحوصات أهلية المتبرع.',
+    },
+    min_weight_kg: {
+      en: 'Minimum weight for safe donation. Below this: health risk.\nRecommended: 45–55 kg.\nAffects: Donor eligibility checks.',
+      ar: 'الحد الأدنى للوزن للتبرع الآمن. أقل من ذلك: خطر صحي.\nالموصى: 45–55 كغ.\nيؤثر على: فحوصات أهلية المتبرع.',
+    },
+  }
+
   const serviceLabel = serviceStatus === 'checking'
     ? t('serviceChecking')
     : serviceStatus === 'online'
@@ -399,30 +477,49 @@ export default function SystemSettings() {
                   </span>
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-headline font-bold text-on-surface">
-                    {formatParamLabel(param.key)}
-                  </h3>
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-headline font-bold text-on-surface">
+                      {formatParamLabel(param.key)}
+                    </h3>
+                    {extendedParamInfo[param.key] && (
+                      <InfoPopover icon="help_outline" side="right">
+                        <div className="space-y-1.5">
+                          {extendedParamInfo[param.key][lang as 'en' | 'ar'].split('\n').map((line, i) => (
+                            <p key={i} className={`text-xs ${i === 0 ? 'text-on-surface' : 'text-on-surface-variant'}`}>{line}</p>
+                          ))}
+                        </div>
+                      </InfoPopover>
+                    )}
+                  </div>
                   {param.description && (
                     <p className="text-xs text-on-surface-variant">{getParamDescription(param.key, param.description)}</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  value={param.value}
-                  onChange={(e) => setParams(prev =>
-                    prev.map(p => p.id === param.id ? { ...p, value: e.target.value } : p)
-                  )}
-                  className="flex-1 bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-secondary/20 text-on-surface font-medium"
-                />
-                <button
-                  onClick={() => updateParam(param.id, param.value)}
-                  disabled={saving === param.id}
-                  className="px-5 py-3 bg-secondary text-on-secondary rounded-xl font-semibold text-sm hover:shadow-lg hover:shadow-secondary/20 active:scale-95 transition-all disabled:opacity-60"
-                >
-                  {saving === param.id ? t('saving') : t('save')}
-                </button>
+                {(() => {
+                  const locked = !isAdmin && STAFF_LOCKED_KEYS.has(param.key)
+                  return (
+                    <>
+                      <input
+                        type="number"
+                        value={param.value}
+                        disabled={locked}
+                        onChange={(e) => setParams(prev =>
+                          prev.map(p => p.id === param.id ? { ...p, value: e.target.value } : p)
+                        )}
+                        className={`flex-1 bg-surface-container-low border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-secondary/20 text-on-surface font-medium ${locked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      />
+                      <button
+                        onClick={() => updateParam(param.id, param.value)}
+                        disabled={saving === param.id || locked}
+                        className="px-5 py-3 bg-secondary text-on-secondary rounded-xl font-semibold text-sm hover:shadow-lg hover:shadow-secondary/20 active:scale-95 transition-all disabled:opacity-60"
+                      >
+                        {saving === param.id ? t('saving') : t('save')}
+                      </button>
+                    </>
+                  )
+                })()}
               </div>
             </div>
           ))}
