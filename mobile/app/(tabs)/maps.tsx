@@ -175,7 +175,7 @@ function GlassMarker({ level }: { level: Level }) {
   );
 }
 
-function NativeMap({
+const NativeMap = React.memo(function NativeMap({
   facilities,
   theme,
 }: {
@@ -232,7 +232,7 @@ function NativeMap({
       })}
     </MapView>
   );
-}
+});
 
 function WebMapBanner({ facilities, colors, theme }: { facilities: Facility[]; colors: any; theme: string }) {
   const valid = facilities.filter(hasValidCoords);
@@ -411,9 +411,9 @@ export default function MapsScreen() {
               { borderColor: colors.glassBorder, backgroundColor: colors.surface },
             ]}>
               {Platform.OS !== "web" ? (
-                <NativeMap facilities={filtered} theme={theme} />
+                <NativeMap facilities={facilities} theme={theme} />
               ) : (
-                <WebMapBanner facilities={filtered} colors={colors} theme={theme} />
+                <WebMapBanner facilities={facilities} colors={colors} theme={theme} />
               )}
             </View>
 

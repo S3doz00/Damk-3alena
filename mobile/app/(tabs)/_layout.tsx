@@ -1,38 +1,12 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
-import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import { SymbolView } from "expo-symbols";
 import React from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
-
-function NativeTabLayout() {
-  const { t } = useLanguage();
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "house", selected: "house.fill" }} />
-        <Label>{t('tabHome')}</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="maps">
-        <Icon sf={{ default: "map", selected: "map.fill" }} />
-        <Label>{t('tabMap')}</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="urgent">
-        <Icon sf={{ default: "drop.triangle", selected: "drop.triangle.fill" }} />
-        <Label>{t('tabUrgent')}</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf={{ default: "person.circle", selected: "person.circle.fill" }} />
-        <Label>{t('tabProfile')}</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
 
 function ClassicTabLayout() {
   const isIOS = Platform.OS === "ios";
@@ -108,8 +82,8 @@ function ClassicTabLayout() {
 }
 
 export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
+  // NativeTabs on iOS 26 follow OS appearance and ignore in-app theme switching,
+  // so we always use the classic layout to keep the tab bar in sync with the user's
+  // chosen theme (dark/light) inside the app.
   return <ClassicTabLayout />;
 }

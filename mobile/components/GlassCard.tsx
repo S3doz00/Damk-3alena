@@ -37,11 +37,11 @@ export function GlassCard({
   const wrapperStyle: ViewStyle = {
     ...(variant === "raised"
       ? {
-          shadowColor: isDark ? "#000" : "#000",
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: isDark ? 0.35 : 0.05,
-          shadowRadius: isDark ? 8 : 10,
-          elevation: 2,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: isDark ? 0.35 : 0.08,
+          shadowRadius: isDark ? 14 : 14,
+          elevation: 3,
         }
       : {}),
   };
