@@ -196,7 +196,9 @@ export default function HomeScreen() {
         <Text style={{ fontFamily: Fonts.extrabold, fontSize: 11, color: colors.textMuted, letterSpacing: 1.4, marginBottom: 10, textTransform: "uppercase" }}>{t('donationEligibility')}</Text>
       </View>
       <View style={{ paddingHorizontal: 20, marginBottom: 24 }}>
-        <EligibilityGauge daysLeft={daysLeft} lastDonation={profile?.lastDonationDate ?? null} />
+        <GlassCard glowColor={daysLeft <= 0 ? "#10B981" : colors.primary} borderRadius={20}>
+          <EligibilityGauge daysLeft={daysLeft} lastDonation={profile?.lastDonationDate ?? null} />
+        </GlassCard>
       </View>
 
       {/* Blood Drives / Campaigns */}

@@ -92,10 +92,11 @@ function HospitalMapCard({
   const criticalCount = facility.bloodNeeds.filter((n) => n.level === "critical").length;
 
   return (
-    <GlassCard glowColor={glow} style={{ padding: 18 }}>
+    <GlassCard glowColor={glow}>
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={() => router.push({ pathname: "/hospital/[id]", params: { id: facility.id } })}
+        style={{ padding: 18 }}
       >
         {/* Status row — worst stock level + critical count */}
         <View style={styles.statusRow}>
