@@ -17,6 +17,7 @@ import UrgencyBadge from "@/components/UrgencyBadge";
 import { Fonts } from "@/constants/fonts";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/context/ThemeContext";
+import { useApp } from "@/context/AppContext";
 
 interface MyCampaignRow {
   registration_id: string;
@@ -35,6 +36,7 @@ interface MyCampaignRow {
 
 export default function MyCampaignsScreen() {
   const { colors } = useTheme();
+  const { profile } = useApp();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? Math.max(insets.top, 67) : insets.top;
   const botPad = Platform.OS === "web" ? Math.max(insets.bottom, 34) : insets.bottom;
@@ -42,10 +44,7 @@ export default function MyCampaignsScreen() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth?.user) return setLoading(false);
-    const { data: donor } = await supabase.from("donors").select("id").eq("auth_id", auth.user.id).single();
-    if (!donor) return setLoading(false);
+    if (!profile?.id) return setLoading(false);
 
     const { data } = await supabase
       .from("campaign_registrations")
@@ -56,7 +55,7 @@ export default function MyCampaignsScreen() {
           facilities:facility_id (name, city)
         )
       `)
-      .eq("donor_id", donor.id)
+      .eq("donor_id", profile.id)
       .order("registered_at", { ascending: false });
 
     if (data) {
@@ -81,7 +80,7 @@ export default function MyCampaignsScreen() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [profile?.id]);
 
   const unregister = (row: MyCampaignRow) => {
     const doUnreg = async () => {

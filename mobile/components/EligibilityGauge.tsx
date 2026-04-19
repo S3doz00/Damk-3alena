@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   root: {
     alignItems: "center",
     paddingVertical: 20,
-    gap: 10,
+    gap: 18,
   },
   pill: {
     flexDirection: "row",
@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
+    marginBottom: 4,
   },
   ringWrap: {
     width: SIZE,
