@@ -96,10 +96,16 @@ export default function EligibilityGauge({
     transform: [{ scale: 0.95 + halo.value * 0.1 }],
   }));
 
-  const innerColor = eligible
-    ? "rgba(16, 185, 129, 0.18)"
-    : "rgba(225, 29, 72, 0.14)";
-  const trackColor = isDark ? "#27272A" : "#F1F5F9";
+  // Inner disc is now a solid saturated fill in both themes so the gauge reads
+  // the same in light mode as it does in dark (dark-green / dark-rose disc with
+  // a crisp white heart floating on top). Previously the light-mode inner was
+  // a ~15% alpha wash that disappeared into the parchment surface.
+  const innerColor = eligible ? "#10B981" : "#E11D48";
+  const innerSoftColor = eligible
+    ? "rgba(52, 211, 153, 0.45)"
+    : "rgba(244, 114, 182, 0.40)";
+  const heartColor = "#FFFFFF";
+  const trackColor = isDark ? "#27272A" : "#E8DFCB";
 
   return (
     <View style={styles.root}>
@@ -162,11 +168,12 @@ export default function EligibilityGauge({
             originX={SIZE / 2}
             originY={SIZE / 2}
           />
-          <Circle cx={SIZE / 2} cy={SIZE / 2} r={R - 14} fill={innerColor} />
+          <Circle cx={SIZE / 2} cy={SIZE / 2} r={R - 14} fill={innerColor} fillOpacity={0.9} />
+          <Circle cx={SIZE / 2} cy={SIZE / 2} r={R - 34} fill={innerSoftColor} />
         </Svg>
 
         <Animated.View style={[styles.heart, heartStyle]}>
-          <Feather name="heart" size={44} color={startColor} />
+          <Feather name="heart" size={44} color={heartColor} />
         </Animated.View>
       </View>
 
