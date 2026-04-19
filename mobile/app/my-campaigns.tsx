@@ -14,7 +14,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import GlassCard from "@/components/GlassCard";
 import UrgencyBadge from "@/components/UrgencyBadge";
-import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/fonts";
 import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/context/ThemeContext";

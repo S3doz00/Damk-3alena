@@ -37,11 +37,11 @@ export function GlassCard({
   const wrapperStyle: ViewStyle = {
     ...(variant === "raised"
       ? {
-          shadowColor: isDark ? borderHue : "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isDark ? 0.22 : 0.05,
-          shadowRadius: isDark ? 20 : 10,
-          elevation: 3,
+          shadowColor: isDark ? "#000" : "#000",
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: isDark ? 0.35 : 0.05,
+          shadowRadius: isDark ? 8 : 10,
+          elevation: 2,
         }
       : {}),
   };
@@ -58,25 +58,6 @@ export function GlassCard({
 
   return (
     <View style={[wrapperStyle, style]} {...rest}>
-      {/* Soft external halo — spills beyond card bounds for a true "lit from within" feel.
-          Dark mode only: in light mode the parchment surface reads fine without a glow. */}
-      {isDark && (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: -30,
-            right: -30,
-            width: 180,
-            height: 140,
-            borderRadius: 100,
-            backgroundColor: borderHue,
-            opacity: 0.18,
-            transform: [{ scaleX: 1.4 }],
-          }}
-        />
-      )}
-
       <View style={cardStyle}>
         {/* Dark mode: real blur. Light mode: solid surface (no blur) to keep parchment crispness. */}
         {isDark && Platform.OS !== "android" && (
