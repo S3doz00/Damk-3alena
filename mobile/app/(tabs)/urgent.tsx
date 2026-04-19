@@ -16,6 +16,8 @@ import { useApp } from "@/context/AppContext";
 import { supabase } from "@/lib/supabase";
 import { canDonate } from "@/lib/bloodCompatibility";
 import type { BloodType } from "@/context/AppContext";
+import GlassCard from "@/components/GlassCard";
+import { Fonts } from "@/constants/fonts";
 
 type UrgencyLevel = "critical" | "urgent" | "normal" | "pending";
 
@@ -61,67 +63,69 @@ function UrgentCaseCard({ item, colors, donorType }: { item: BloodRequest; color
   const compatible = canDonate(donorType, item.bloodType);
 
   return (
-    <View style={{ backgroundColor: colors.card, borderRadius: 20, padding: 18, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3, borderWidth: 1, borderColor: colors.separator, borderLeftWidth: 4, borderLeftColor: cfg.color }}>
-      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text }}>{item.patientName}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: cfg.bg }}>
-              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: cfg.color, marginRight: 4 }} />
-              <Text style={{ fontSize: 10, fontWeight: "800", letterSpacing: 0.5, color: cfg.color }}>{t(cfg.labelKey)}</Text>
+    <GlassCard glowColor={cfg.color} borderRadius={20}>
+      <View style={{ padding: 18 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+              <Text style={{ fontFamily: Fonts.extrabold, fontSize: 16, color: colors.text, letterSpacing: -0.3 }}>{item.patientName}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: cfg.color + "1F" }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: cfg.color, marginRight: 4 }} />
+                <Text style={{ fontFamily: Fonts.extrabold, fontSize: 10, letterSpacing: 0.8, color: cfg.color, textTransform: "uppercase" }}>{t(cfg.labelKey)}</Text>
+              </View>
             </View>
+            <Text style={{ fontFamily: Fonts.medium, fontSize: 12, color: colors.textMuted }}>{item.fileNumber}</Text>
           </View>
-          <Text style={{ fontSize: 12, color: colors.textMuted, fontWeight: "500" }}>{item.fileNumber}</Text>
+          <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: bloodColor, alignItems: "center", justifyContent: "center" }}>
+            <Text style={{ fontFamily: Fonts.extrabold, fontSize: 14, color: "#fff", letterSpacing: -0.3 }}>{item.bloodType}</Text>
+          </View>
         </View>
-        <View style={{ width: 48, height: 48, borderRadius: 14, backgroundColor: bloodColor, alignItems: "center", justifyContent: "center" }}>
-          <Text style={{ fontSize: 14, fontWeight: "800", color: "#fff" }}>{item.bloodType}</Text>
-        </View>
-      </View>
 
-      <View style={{ gap: 8, marginBottom: 16 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <Feather name="map-pin" size={13} color={colors.textMuted} />
-          <Text style={{ fontSize: 13, color: colors.textSecondary, flex: 1 }} numberOfLines={1}>{item.hospitalName}</Text>
-        </View>
-        {item.cause ? (
+        <View style={{ gap: 8, marginBottom: 16 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Feather name="activity" size={13} color={colors.textMuted} />
-            <Text style={{ fontSize: 13, color: colors.textSecondary }}>{item.cause}</Text>
+            <Feather name="map-pin" size={13} color={colors.textMuted} />
+            <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary, flex: 1 }} numberOfLines={1}>{item.hospitalName}</Text>
           </View>
-        ) : null}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <Feather name="clock" size={13} color={colors.textMuted} />
-          <Text style={{ fontSize: 13, color: colors.textSecondary }}>{timeAgo(item.postedAt)}</Text>
+          {item.cause ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Feather name="activity" size={13} color={colors.textMuted} />
+              <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary }}>{item.cause}</Text>
+            </View>
+          ) : null}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Feather name="clock" size={13} color={colors.textMuted} />
+            <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary }}>{timeAgo(item.postedAt)}</Text>
+          </View>
+        </View>
+
+        {!compatible && donorType && (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#FEF3C7", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12, borderWidth: 1, borderColor: "#F59E0B" + "55" }}>
+            <Feather name="alert-triangle" size={14} color="#92400E" />
+            <Text style={{ flex: 1, fontFamily: Fonts.semibold, fontSize: 11.5, color: "#78350F", lineHeight: 15 }}>
+              Your {donorType} blood can't donate to {item.bloodType}
+            </Text>
+          </View>
+        )}
+
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Feather name="droplet" size={13} color={bloodColor} />
+            <Text style={{ fontFamily: Fonts.bold, fontSize: 13, color: bloodColor }}>{item.unitsNeeded} {t('unitsNeeded')}</Text>
+          </View>
+          <TouchableOpacity
+            disabled={!compatible}
+            style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: compatible ? cfg.color : colors.inputBorder, opacity: compatible ? 1 : 0.7 }}
+            onPress={() => router.push({ pathname: "/appointment/book", params: { hospitalId: item.hospitalId } })}
+            activeOpacity={0.85}
+          >
+            <Text style={{ fontFamily: Fonts.bold, fontSize: 13, color: compatible ? "#fff" : colors.textMuted, letterSpacing: 0.2 }}>
+              {compatible ? t('donateNow') : "Not compatible"}
+            </Text>
+            {compatible && <Feather name="arrow-right" size={14} color="#fff" />}
+          </TouchableOpacity>
         </View>
       </View>
-
-      {!compatible && donorType && (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "#FEF3C7", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 12, borderWidth: 1, borderColor: "#F59E0B" + "55" }}>
-          <Feather name="alert-triangle" size={14} color="#92400E" />
-          <Text style={{ flex: 1, fontSize: 11.5, fontWeight: "600", color: "#78350F", lineHeight: 15 }}>
-            Your {donorType} blood can't donate to {item.bloodType}
-          </Text>
-        </View>
-      )}
-
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Feather name="droplet" size={13} color={bloodColor} />
-          <Text style={{ fontSize: 13, fontWeight: "700", color: bloodColor }}>{item.unitsNeeded} {t('unitsNeeded')}</Text>
-        </View>
-        <TouchableOpacity
-          disabled={!compatible}
-          style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: compatible ? cfg.color : colors.inputBorder, opacity: compatible ? 1 : 0.7 }}
-          onPress={() => router.push({ pathname: "/appointment/book", params: { hospitalId: item.hospitalId } })}
-          activeOpacity={0.85}
-        >
-          <Text style={{ fontSize: 13, fontWeight: "700", color: compatible ? "#fff" : colors.textMuted }}>
-            {compatible ? t('donateNow') : "Not compatible"}
-          </Text>
-          {compatible && <Feather name="arrow-right" size={14} color="#fff" />}
-        </TouchableOpacity>
-      </View>
-    </View>
+    </GlassCard>
   );
 }
 

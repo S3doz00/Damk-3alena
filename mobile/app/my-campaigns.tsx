@@ -17,6 +17,7 @@ import UrgencyBadge from "@/components/UrgencyBadge";
 import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/fonts";
 import { supabase } from "@/lib/supabase";
+import { useTheme } from "@/context/ThemeContext";
 
 interface MyCampaignRow {
   registration_id: string;
@@ -34,6 +35,7 @@ interface MyCampaignRow {
 }
 
 export default function MyCampaignsScreen() {
+  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? Math.max(insets.top, 67) : insets.top;
   const botPad = Platform.OS === "web" ? Math.max(insets.bottom, 34) : insets.bottom;
@@ -104,29 +106,29 @@ export default function MyCampaignsScreen() {
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { paddingTop: topPad + 16 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Feather name="arrow-left" size={22} color={Colors.light.text} />
+        <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: colors.card }]}>
+          <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>My Campaigns</Text>
+        <Text style={[styles.title, { color: colors.text }]}>My Campaigns</Text>
       </View>
 
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <ActivityIndicator color={Colors.light.primary} />
+          <ActivityIndicator color={colors.primary} />
         </View>
       ) : rows.length === 0 ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 }}>
-          <Feather name="calendar" size={48} color={Colors.light.textSecondary} style={{ marginBottom: 12, opacity: 0.4 }} />
-          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 17, color: Colors.light.text, marginBottom: 6, letterSpacing: -0.3 }}>
+          <Feather name="calendar" size={48} color={colors.textSecondary} style={{ marginBottom: 12, opacity: 0.4 }} />
+          <Text style={{ fontFamily: Fonts.extrabold, fontSize: 17, color: colors.text, marginBottom: 6, letterSpacing: -0.3 }}>
             No registered campaigns yet
           </Text>
-          <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: Colors.light.textSecondary, textAlign: "center", lineHeight: 20 }}>
+          <Text style={{ fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, textAlign: "center", lineHeight: 20 }}>
             Once you register for a blood drive it will show up here.
           </Text>
           <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 20, backgroundColor: Colors.light.primary, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 14 }}
+            style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 20, backgroundColor: colors.primary, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 14 }}
             onPress={() => router.push("/campaigns")}
             activeOpacity={0.85}
           >
@@ -159,24 +161,24 @@ export default function MyCampaignsScreen() {
                         ) : (
                           <UrgencyBadge urgency={item.urgency} />
                         )}
-                        <Text style={{ fontFamily: Fonts.semibold, fontSize: 13, color: Colors.light.textSecondary }}>{dateLabel}</Text>
+                        <Text style={{ fontFamily: Fonts.semibold, fontSize: 13, color: colors.textSecondary }}>{dateLabel}</Text>
                       </View>
 
-                      <Text style={{ fontFamily: Fonts.extrabold, fontSize: 17, color: Colors.light.text, letterSpacing: -0.3 }} numberOfLines={1}>{item.title}</Text>
-                      <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: Colors.light.textSecondary }} numberOfLines={1}>
+                      <Text style={{ fontFamily: Fonts.extrabold, fontSize: 17, color: colors.text, letterSpacing: -0.3 }} numberOfLines={1}>{item.title}</Text>
+                      <Text style={{ fontFamily: Fonts.medium, fontSize: 13, color: colors.textSecondary }} numberOfLines={1}>
                         {item.facility_name}{item.facility_city ? ` · ${item.facility_city}` : ""}
                       </Text>
 
                       <View style={{ flexDirection: "row", gap: 16, marginTop: 2 }}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                          <Feather name="clock" size={13} color={Colors.light.textMuted} />
-                          <Text style={{ fontFamily: Fonts.medium, fontSize: 12.5, color: Colors.light.textMuted }}>
+                          <Feather name="clock" size={13} color={colors.textMuted} />
+                          <Text style={{ fontFamily: Fonts.medium, fontSize: 12.5, color: colors.textMuted }}>
                             {item.start_time.slice(0, 5)} - {item.end_time.slice(0, 5)}
                           </Text>
                         </View>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                          <Feather name="droplet" size={13} color={Colors.light.textMuted} />
-                          <Text style={{ fontFamily: Fonts.bold, fontSize: 12.5, color: Colors.light.primary, letterSpacing: -0.2 }}>
+                          <Feather name="droplet" size={13} color={colors.textMuted} />
+                          <Text style={{ fontFamily: Fonts.bold, fontSize: 12.5, color: colors.primary, letterSpacing: -0.2 }}>
                             {item.blood_type}
                           </Text>
                         </View>
@@ -185,7 +187,7 @@ export default function MyCampaignsScreen() {
                       {!past && (
                         <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
                           <TouchableOpacity
-                            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderRadius: 12, backgroundColor: Colors.light.primary }}
+                            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderRadius: 12, backgroundColor: colors.primary }}
                             onPress={() => router.push({ pathname: "/campaign/[id]", params: { id: item.campaign_id } })}
                             activeOpacity={0.85}
                           >
@@ -193,12 +195,12 @@ export default function MyCampaignsScreen() {
                             <Text style={{ fontFamily: Fonts.bold, color: "#fff", fontSize: 13, letterSpacing: 0.2 }}>Details</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
-                            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderRadius: 12, borderWidth: 1.5, borderColor: "#FCA5A5", backgroundColor: "#FFF5F5" }}
+                            style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 11, borderRadius: 12, borderWidth: 1.5, borderColor: colors.primary + "40", backgroundColor: colors.primary + "12" }}
                             onPress={() => unregister(item)}
                             activeOpacity={0.85}
                           >
-                            <Feather name="x" size={14} color={Colors.light.primary} />
-                            <Text style={{ fontFamily: Fonts.bold, color: Colors.light.primary, fontSize: 13, letterSpacing: 0.2 }}>Unregister</Text>
+                            <Feather name="x" size={14} color={colors.primary} />
+                            <Text style={{ fontFamily: Fonts.bold, color: colors.primary, fontSize: 13, letterSpacing: 0.2 }}>Unregister</Text>
                           </TouchableOpacity>
                         </View>
                       )}
@@ -217,12 +219,11 @@ export default function MyCampaignsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.light.background },
+  container: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 16, gap: 14 },
   backBtn: {
     width: 40, height: 40, borderRadius: 12,
-    backgroundColor: Colors.light.card,
     alignItems: "center", justifyContent: "center",
   },
-  title: { fontFamily: Fonts.extrabold, fontSize: 22, color: Colors.light.text, letterSpacing: -0.5 },
+  title: { fontFamily: Fonts.extrabold, fontSize: 22, letterSpacing: -0.5 },
 });

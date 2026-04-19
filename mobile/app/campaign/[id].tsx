@@ -55,23 +55,18 @@ export default function CampaignDetailScreen() {
         .single();
       if (data) setCampaign(data as CampaignDetail);
 
-      // Check existing registration for THIS donor.
-      const { data: auth } = await supabase.auth.getUser();
-      if (auth?.user) {
-        const { data: donor } = await supabase.from("donors").select("id").eq("auth_id", auth.user.id).single();
-        if (donor) {
-          const { data: reg } = await supabase
-            .from("campaign_registrations")
-            .select("id")
-            .eq("campaign_id", id)
-            .eq("donor_id", donor.id)
-            .maybeSingle();
-          if (reg) setRegistered(true);
-        }
+      if (profile?.id) {
+        const { data: reg } = await supabase
+          .from("campaign_registrations")
+          .select("id")
+          .eq("campaign_id", id)
+          .eq("donor_id", profile.id)
+          .maybeSingle();
+        if (reg) setRegistered(true);
       }
       setLoading(false);
     })();
-  }, [id]);
+  }, [id, profile?.id]);
 
   if (loading) {
     return (
@@ -108,16 +103,16 @@ export default function CampaignDetailScreen() {
     }
     if (registered) return;
 
+    if (!profile?.id) {
+      Alert.alert("Profile Incomplete", "Please complete your donor profile before registering.");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth?.user) throw new Error("Not signed in");
-      const { data: donor } = await supabase.from("donors").select("id").eq("auth_id", auth.user.id).single();
-      if (!donor) throw new Error("Donor not found");
-
       const { error } = await supabase.from("campaign_registrations").insert({
         campaign_id: campaign.id,
-        donor_id: donor.id,
+        donor_id: profile.id,
         blood_type: donorType,
       });
 

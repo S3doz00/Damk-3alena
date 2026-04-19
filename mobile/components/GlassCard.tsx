@@ -4,20 +4,12 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/context/ThemeContext";
 
-// Glassmorphism card matching dashboard's "Glass card — DASHBOARD" spec:
-// 2-px top border in category color · inset highlight · soft blur.
-//
-// Layers (bottom → top):
-//   1. BlurView (dark: intensity 40 / light: intensity 25)
-//   2. Tinted glass background (theme.glassBg)
-//   3. LinearGradient inset-highlight (top)
-//   4. Optional 2-px accent border (glowColor)
-//   5. Children
-//
-// Props:
-//   glowColor    — border/glow hue. Defaults to primary.
-//   intensity    — blur amount (0 disables blur).
-//   variant      — "raised" (default) | "flat" (no shadow).
+// Glassmorphism card. Two-layer structure:
+//   Outer wrapper (no overflow)  — carries shadow + soft halo spill
+//   Inner card    (overflow hidden, borderRadius) — blur + 2-px top accent + content
+// This lets the corner halo bleed past the card edge as a real glow
+// instead of being clipped to a flat rectangle.
+
 export interface GlassCardProps extends ViewProps {
   glowColor?: string;
   intensity?: number;
@@ -42,77 +34,91 @@ export function GlassCard({
   const blurIntensity = intensity ?? (isDark ? 40 : 25);
   const tint: "dark" | "light" = isDark ? "dark" : "light";
 
-  const containerStyle: ViewStyle = {
-    borderRadius,
-    overflow: "hidden",
-    // On both platforms, render a solid surface in light mode so the card reads as
-    // a clean parchment card rather than a ghostly translucent wash. Dark mode
-    // keeps the blur for that "command center" glassmorphism.
-    backgroundColor: isDark
-      ? (Platform.OS === "android" ? colors.card : "transparent")
-      : colors.surface,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
+  const wrapperStyle: ViewStyle = {
     ...(variant === "raised"
       ? {
-          shadowColor: isDark ? "#000" : "#000",
+          shadowColor: isDark ? borderHue : "#000",
           shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isDark ? 0.35 : 0.06,
-          shadowRadius: isDark ? 18 : 12,
+          shadowOpacity: isDark ? 0.22 : 0.05,
+          shadowRadius: isDark ? 20 : 10,
           elevation: 3,
         }
       : {}),
   };
 
-  return (
-    <View style={[containerStyle, style]} {...rest}>
-      {/* Dark mode: real blur for glass effect. Light mode: the solid surface above
-          already provides the card look, so we skip blur to avoid the washed-out haze. */}
-      {isDark && Platform.OS !== "android" && (
-        <BlurView
-          intensity={blurIntensity}
-          tint={tint}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
+  const cardStyle: ViewStyle = {
+    borderRadius,
+    overflow: "hidden",
+    backgroundColor: isDark
+      ? (Platform.OS === "android" ? colors.card : "transparent")
+      : colors.surface,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+  };
 
-      {/* Tinted glass overlay — only in dark mode */}
+  return (
+    <View style={[wrapperStyle, style]} {...rest}>
+      {/* Soft external halo — spills beyond card bounds for a true "lit from within" feel.
+          Dark mode only: in light mode the parchment surface reads fine without a glow. */}
       {isDark && (
         <View
-          style={[StyleSheet.absoluteFill, { backgroundColor: colors.glassBg }]}
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: 180,
+            height: 140,
+            borderRadius: 100,
+            backgroundColor: borderHue,
+            opacity: 0.18,
+            transform: [{ scaleX: 1.4 }],
+          }}
         />
       )}
 
-      {/* 2-px top accent in category color */}
-      <View
-        pointerEvents="none"
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-          height: 2,
-          backgroundColor: borderHue,
-          opacity: isDark ? 0.9 : 0.85,
-        }}
-      />
+      <View style={cardStyle}>
+        {/* Dark mode: real blur. Light mode: solid surface (no blur) to keep parchment crispness. */}
+        {isDark && Platform.OS !== "android" && (
+          <BlurView
+            intensity={blurIntensity}
+            tint={tint}
+            style={StyleSheet.absoluteFill}
+          />
+        )}
 
-      {/* Soft glow orb top-right — strong in dark, very subtle in light */}
-      <LinearGradient
-        pointerEvents="none"
-        colors={[borderHue + (isDark ? "55" : "14"), "transparent"]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0.3, y: 0.7 }}
-        style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: isDark ? 160 : 120,
-          height: isDark ? 120 : 80,
-        }}
-      />
+        {/* Tinted overlay — dark only. */}
+        {isDark && (
+          <View
+            style={[StyleSheet.absoluteFill, { backgroundColor: colors.glassBg }]}
+          />
+        )}
 
-      <View style={{ position: "relative" }}>{children}</View>
+        {/* Internal diagonal sheen — subtle, extends cleanly because it fades before the edge. */}
+        <LinearGradient
+          pointerEvents="none"
+          colors={[borderHue + (isDark ? "22" : "0A"), "transparent"]}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 0.2, y: 0.8 }}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* 2-px top accent in category color. */}
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            height: 2,
+            backgroundColor: borderHue,
+            opacity: isDark ? 0.95 : 0.85,
+          }}
+        />
+
+        <View style={{ position: "relative" }}>{children}</View>
+      </View>
     </View>
   );
 }
