@@ -164,10 +164,12 @@ function HospitalMapCard({
 }
 
 // Custom glass marker — circular ring + inner dot, color matches worst stock level.
+// collapsable={false} is required on Android: without it React Native collapses the
+// view hierarchy and the Marker renders blank inside PROVIDER_GOOGLE.
 function GlassMarker({ level }: { level: Level }) {
   const color = StockColors[level];
   return (
-    <View style={markerStyles.outer}>
+    <View collapsable={false} style={markerStyles.outer}>
       <View style={[markerStyles.ring, { borderColor: color + "55" }]} />
       <View style={[markerStyles.dot, { backgroundColor: color, shadowColor: color }]}>
         <View style={markerStyles.inner} />

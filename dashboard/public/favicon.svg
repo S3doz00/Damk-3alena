@@ -1,4 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Rounded red background -->
   <rect width="48" height="48" rx="11" fill="#E11D48"/>
-  <path fill="#FFFFFF" d="M24 10s-9 10.5-9 17a9 9 0 0 0 18 0c0-6.5-9-17-9-17zm0 22a5 5 0 0 1-5-5h2a3 3 0 0 0 3 3v2z"/>
+  <!-- Jordan-map blood drop: outer drop shape -->
+  <path fill="#FFFFFF" d="
+    M24 8
+    C24 8 14 19 14 26
+    a10 10 0 0 0 20 0
+    C34 19 24 8 24 8z
+  "/>
+  <!-- Inner highlight to echo the Jordan cutout -->
+  <path fill="#E11D48" d="
+    M24 20
+    C22 22 21 24 21 26
+    a3 3 0 0 0 6 0
+    C27 24 26 22 24 20z
+  "/>
 </svg>

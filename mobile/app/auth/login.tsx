@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -68,9 +69,11 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.logoWrap}>
-          <View style={[styles.logoCircle, { backgroundColor: colors.primary }]}>
-            <Feather name="droplet" size={28} color="#fff" />
-          </View>
+          <Image
+            source={require("@/assets/images/icon.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={[styles.appName, { color: colors.text }]}>Damk 3alena</Text>
           <Text style={[styles.appTagline, { color: colors.textMuted }]}>{t('bloodDonationPlatformTagline')}</Text>
         </View>
@@ -189,11 +192,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   logoWrap: { alignItems: "center", marginBottom: 28 },
-  logoCircle: {
-    width: 72, height: 72, borderRadius: 22,
-    alignItems: "center", justifyContent: "center", marginBottom: 14,
-    shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 14, elevation: 8,
-  },
+  logoImage: { width: 90, height: 90, borderRadius: 22, marginBottom: 14 },
   appName: { fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   appTagline: { fontSize: 13, marginTop: 4 },
   successBanner: {
