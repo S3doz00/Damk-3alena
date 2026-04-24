@@ -93,7 +93,9 @@ export default function RootLayout() {
     }
   }, []);
 
-  if (!fontsLoaded && !fontError) return null;
+  // Return a white view instead of null so there's no jarring flash between the
+  // red splash screen and the app background while fonts are still loading.
+  if (!fontsLoaded && !fontError) return <View style={{ flex: 1, backgroundColor: "#FFFFFF" }} />;
 
   return (
     <SafeAreaProvider>

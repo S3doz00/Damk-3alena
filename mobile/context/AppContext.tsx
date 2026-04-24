@@ -153,7 +153,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ─── Listen to auth state ──────────────────────────────────────────
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(({ data: { session: s }, error }) => {
+      if (error) {
+        // Invalid/expired refresh token — clear storage and treat as logged out
+        supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
       setSession(s);
       if (s) {
         setIsLoggedIn(true);
@@ -290,14 +296,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         };
         setProfileState(p);
 
-        // Load appointments
-        await loadAppointments(donorRow.id);
-
-        // Load donations
-        await loadDonations(donorRow.id);
-
-        // Load notifications
-        await loadNotifications(donorRow.id);
+        // Load all secondary data in parallel — saves 2 round trips vs sequential awaits
+        await Promise.all([
+          loadAppointments(donorRow.id),
+          loadDonations(donorRow.id),
+          loadNotifications(donorRow.id),
+        ]);
       }
     } catch (err) {
       console.error("Error loading user data:", err);

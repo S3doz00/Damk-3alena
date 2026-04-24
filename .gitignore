@@ -50,3 +50,12 @@ ai-service/data/*.csv
 
 # Supabase
 supabase/.temp/
+.vercel
+
+# Expo
+.expo/
+.expo-shared/
+
+# Backups
+*.bak
+*.old

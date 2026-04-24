@@ -454,11 +454,11 @@ export default function MapsScreen() {
               ))}
             </View>
 
-            {/* Legend — stock levels with semantic colors */}
+            {/* Legend — explicit order avoids key-ordering inconsistency on Android */}
             <View style={styles.legend}>
-              {(Object.keys(StockColors) as Level[]).map((level) => (
+              {(["critical", "low", "moderate", "adequate"] as Level[]).map((level) => (
                 <View key={level} style={styles.legendItem}>
-                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: StockColors[level] }} />
+                  <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: StockColors[level] }} />
                   <Text style={[styles.legendText, { color: colors.textMuted }]}>
                     {t(LEVEL_LABEL_KEYS[level])}
                   </Text>
