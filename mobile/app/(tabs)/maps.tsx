@@ -208,6 +208,21 @@ const NativeMap = React.memo(function NativeMap({
     >
       {validFacilities.map((f) => {
         const level = worstLevel(f);
+        const color = StockColors[level];
+        // Android: custom View children inside Marker are unreliable with
+        // PROVIDER_GOOGLE even with collapsable={false}. Use pinColor instead —
+        // it renders as a native Google Maps pin and is always visible.
+        if (Platform.OS === "android") {
+          return (
+            <Marker
+              key={f.id}
+              coordinate={{ latitude: f.latitude, longitude: f.longitude }}
+              title={f.name}
+              description={f.city || ""}
+              pinColor={color}
+            />
+          );
+        }
         return (
           <Marker
             key={f.id}
