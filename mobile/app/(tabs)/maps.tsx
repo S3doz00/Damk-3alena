@@ -458,7 +458,7 @@ export default function MapsScreen() {
             <View style={styles.legend}>
               {(["critical", "low", "moderate", "adequate"] as Level[]).map((level) => (
                 <View key={level} style={styles.legendItem}>
-                  <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: StockColors[level] }} />
+                  <View style={{ width: 10, height: 10, borderRadius: 5, marginRight: 5, backgroundColor: StockColors[level] }} />
                   <Text style={[styles.legendText, { color: colors.textMuted }]}>
                     {t(LEVEL_LABEL_KEYS[level])}
                   </Text>
@@ -525,8 +525,8 @@ const styles = StyleSheet.create({
   filterBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1 },
   filterText: { fontFamily: Fonts.semibold, fontSize: 12, letterSpacing: 0.3 },
 
-  legend: { flexDirection: "row", gap: 14, marginBottom: 18, flexWrap: "wrap" },
-  legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  legend: { flexDirection: "row", marginBottom: 18, flexWrap: "wrap" },
+  legendItem: { flexDirection: "row", alignItems: "center", marginRight: 14, marginBottom: 4 },
   legendText: { fontFamily: Fonts.medium, fontSize: 11 },
 
   // Card internals
