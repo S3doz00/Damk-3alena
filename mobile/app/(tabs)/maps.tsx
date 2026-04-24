@@ -187,28 +187,15 @@ const NativeMap = React.memo(function NativeMap({
 
   const validFacilities = facilities.filter(hasValidCoords);
 
-  const avgLat = validFacilities.length > 0
-    ? validFacilities.reduce((s, f) => s + f.latitude, 0) / validFacilities.length
-    : 31.9539; // Amman fallback
-  const avgLng = validFacilities.length > 0
-    ? validFacilities.reduce((s, f) => s + f.longitude, 0) / validFacilities.length
-    : 35.9106;
-
-  const lats = validFacilities.map((f) => f.latitude);
-  const lngs = validFacilities.map((f) => f.longitude);
-  const latDelta = validFacilities.length > 1 ? (Math.max(...lats) - Math.min(...lats)) * 1.5 + 0.05 : 0.15;
-  const lngDelta = validFacilities.length > 1 ? (Math.max(...lngs) - Math.min(...lngs)) * 1.5 + 0.05 : 0.15;
+  // Fixed on Amman — avoids Aqaba (29.5°N) bloating the delta to 4.6° and
+  // showing Syria/Lebanon on Android where initialRegion is applied literally.
+  const AMMAN = { latitude: 31.9539, longitude: 35.9106, latitudeDelta: 1.2, longitudeDelta: 1.2 };
 
   return (
     <MapView
       style={{ flex: 1 }}
       provider={PROVIDER_GOOGLE}
-      initialRegion={{
-        latitude: avgLat,
-        longitude: avgLng,
-        latitudeDelta: Math.max(latDelta, 0.05),
-        longitudeDelta: Math.max(lngDelta, 0.05),
-      }}
+      initialRegion={AMMAN}
       zoomEnabled
       scrollEnabled
       pitchEnabled
