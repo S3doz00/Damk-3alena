@@ -19,6 +19,7 @@ import Colors from "@/constants/colors";
 import { Fonts } from "@/constants/fonts";
 import { supabase } from "@/lib/supabase";
 import { useApp } from "@/context/AppContext";
+import { useTheme } from "@/context/ThemeContext";
 import { canDonateToAny } from "@/lib/bloodCompatibility";
 
 interface CampaignDetail {
@@ -39,6 +40,8 @@ interface CampaignDetail {
 export default function CampaignDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile } = useApp();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const insets = useSafeAreaInsets();
   const [registered, setRegistered] = useState(false);
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
@@ -71,7 +74,7 @@ export default function CampaignDetailScreen() {
   if (loading) {
     return (
       <View style={styles.notFound}>
-        <ActivityIndicator color={Colors.light.primary} />
+        <ActivityIndicator color={colors.primary} />
       </View>
     );
   }
@@ -151,7 +154,7 @@ export default function CampaignDetailScreen() {
     >
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Feather name="arrow-left" size={22} color={Colors.light.text} />
+          <Feather name="arrow-left" size={22} color={colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -164,11 +167,11 @@ export default function CampaignDetailScreen() {
 
             <View style={styles.heroMeta}>
               <View style={styles.heroMetaItem}>
-                <Feather name="calendar" size={16} color={Colors.light.primary} />
+                <Feather name="calendar" size={16} color={colors.primary} />
                 <Text style={styles.heroMetaText}>{dateLabel}</Text>
               </View>
               <View style={styles.heroMetaItem}>
-                <Feather name="clock" size={16} color={Colors.light.primary} />
+                <Feather name="clock" size={16} color={colors.primary} />
                 <Text style={styles.heroMetaText}>
                   {campaign.start_time.slice(0, 5)} - {campaign.end_time.slice(0, 5)}
                 </Text>
@@ -179,7 +182,7 @@ export default function CampaignDetailScreen() {
       </View>
 
       <View style={{ marginHorizontal: 20, marginBottom: 12 }}>
-        <GlassCard glowColor={Colors.light.primary} borderRadius={16}>
+        <GlassCard glowColor={colors.primary} borderRadius={16}>
           <View style={{ flexDirection: "row", padding: 20 }}>
             <View style={styles.statBox}>
               <Text style={styles.statNum}>{campaign.registered_donors}</Text>
@@ -194,7 +197,7 @@ export default function CampaignDetailScreen() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statBox}>
-              <Text style={[styles.statNum, { color: Colors.light.success }]}>
+              <Text style={[styles.statNum, { color: colors.success }]}>
                 {pct}%
               </Text>
               <Text style={styles.statLabel}>Filled</Text>
@@ -278,36 +281,36 @@ export default function CampaignDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.light.background },
+const makeStyles = (colors: typeof Colors.light) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   notFound: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: { paddingHorizontal: 20, marginBottom: 16 },
   backBtn: {
     width: 44, height: 44, borderRadius: 12,
-    backgroundColor: Colors.light.card,
+    backgroundColor: colors.card,
     alignItems: "center", justifyContent: "center",
   },
   heroTitle: {
     fontFamily: Fonts.extrabold, fontSize: 22,
-    color: Colors.light.text, marginTop: 12, marginBottom: 4, letterSpacing: -0.4,
+    color: colors.text, marginTop: 12, marginBottom: 4, letterSpacing: -0.4,
   },
   heroHospital: {
     fontFamily: Fonts.medium, fontSize: 15,
-    color: Colors.light.textSecondary, marginBottom: 16,
+    color: colors.textSecondary, marginBottom: 16,
   },
   heroMeta: { flexDirection: "row", gap: 20 },
   heroMetaItem: { flexDirection: "row", alignItems: "center", gap: 8 },
-  heroMetaText: { fontFamily: Fonts.semibold, fontSize: 14, color: Colors.light.text },
+  heroMetaText: { fontFamily: Fonts.semibold, fontSize: 14, color: colors.text },
   statBox: { flex: 1, alignItems: "center" },
-  statNum: { fontFamily: Fonts.extrabold, fontSize: 24, color: Colors.light.primary, letterSpacing: -0.5 },
-  statLabel: { fontFamily: Fonts.medium, fontSize: 11.5, color: Colors.light.textSecondary, marginTop: 4, letterSpacing: 0.3, textTransform: "uppercase" },
-  statDivider: { width: 1, backgroundColor: Colors.light.separator },
+  statNum: { fontFamily: Fonts.extrabold, fontSize: 24, color: colors.primary, letterSpacing: -0.5 },
+  statLabel: { fontFamily: Fonts.medium, fontSize: 11.5, color: colors.textSecondary, marginTop: 4, letterSpacing: 0.3, textTransform: "uppercase" },
+  statDivider: { width: 1, backgroundColor: colors.separator },
   progressWrap: { paddingHorizontal: 20, marginBottom: 16 },
   progressBg: {
-    height: 10, backgroundColor: Colors.light.separator,
+    height: 10, backgroundColor: colors.separator,
     borderRadius: 5, overflow: "hidden",
   },
-  progressBar: { height: "100%", backgroundColor: Colors.light.primary, borderRadius: 5 },
+  progressBar: { height: "100%", backgroundColor: colors.primary, borderRadius: 5 },
   incompatWarn: {
     flexDirection: "row", alignItems: "center", gap: 10,
     backgroundColor: "#FEF3C7", borderRadius: 12,
@@ -319,28 +322,28 @@ const styles = StyleSheet.create({
   section: { paddingHorizontal: 20, marginBottom: 24 },
   sectionTitle: {
     fontFamily: Fonts.extrabold, fontSize: 11,
-    color: Colors.light.textMuted, marginBottom: 12,
+    color: colors.textMuted, marginBottom: 12,
     letterSpacing: 1.4, textTransform: "uppercase",
   },
-  description: { fontFamily: Fonts.medium, fontSize: 15, color: Colors.light.textSecondary, lineHeight: 22 },
+  description: { fontFamily: Fonts.medium, fontSize: 15, color: colors.textSecondary, lineHeight: 22 },
   bloodTypes: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   btChip: {
     paddingHorizontal: 16, paddingVertical: 10,
     borderRadius: 12, backgroundColor: "#FEE2E2",
   },
-  btText: { fontFamily: Fonts.extrabold, fontSize: 16, color: Colors.light.primary, letterSpacing: -0.3 },
+  btText: { fontFamily: Fonts.extrabold, fontSize: 16, color: colors.primary, letterSpacing: -0.3 },
   tipRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, marginBottom: 10 },
-  tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.light.primary, marginTop: 8 },
-  tipText: { flex: 1, fontFamily: Fonts.medium, fontSize: 14, color: Colors.light.textSecondary, lineHeight: 20 },
+  tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary, marginTop: 8 },
+  tipText: { flex: 1, fontFamily: Fonts.medium, fontSize: 14, color: colors.textSecondary, lineHeight: 20 },
   registerBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    backgroundColor: Colors.light.primary, marginHorizontal: 20,
+    backgroundColor: colors.primary, marginHorizontal: 20,
     paddingVertical: 18, borderRadius: 16, gap: 10,
-    shadowColor: Colors.light.primary,
+    shadowColor: colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35, shadowRadius: 10, elevation: 6,
   },
-  registerBtnDone: { backgroundColor: Colors.light.success, shadowColor: Colors.light.success },
+  registerBtnDone: { backgroundColor: colors.success, shadowColor: colors.success },
   registerBtnDisabled: { backgroundColor: "#9CA3AF", shadowOpacity: 0 },
   registerBtnText: { fontFamily: Fonts.bold, color: "#fff", fontSize: 17, letterSpacing: 0.2 },
 });
