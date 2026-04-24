@@ -80,34 +80,18 @@ export default function Layout() {
         <div className={`py-5 border-b border-outline ${collapsed ? 'px-3' : 'px-5'}`}>
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             {collapsed ? (
-              /* Collapsed: logo icon doubles as expand button */
+              /* Collapsed: logo doubles as expand button */
               <button
                 onClick={toggleSidebar}
                 title={t('lockSidebar')}
-                className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
+                className="w-9 h-9 flex items-center justify-center flex-shrink-0 cursor-pointer hover:scale-105 transition-transform"
               >
-                <span
-                  className="material-symbols-outlined text-on-primary"
-                  style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}
-                >
-                  water_drop
-                </span>
+                <img src="/logo.png" alt="Damk 3alena" className="w-9 h-9 object-contain" />
               </button>
             ) : (
               /* Expanded: logo + title + collapse arrow */
               <>
-                <div
-                  className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ boxShadow: '0 0 20px rgba(225, 29, 72, 0.35)' }}
-                >
-                  <span
-                    className="material-symbols-outlined text-on-primary"
-                    style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}
-                  >
-                    water_drop
-                  </span>
-                </div>
+                <img src="/logo.png" alt="Damk 3alena" className="w-9 h-9 object-contain flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <h1 className="font-headline font-bold text-base text-on-surface tracking-tight leading-tight whitespace-nowrap">
                     Damk 3alena

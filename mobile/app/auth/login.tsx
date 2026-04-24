@@ -70,7 +70,7 @@ export default function LoginScreen() {
       >
         <View style={styles.logoWrap}>
           <Image
-            source={require("@/assets/images/icon.png")}
+            source={require("@/assets/images/logo-nobg.png")}
             style={styles.logoImage}
             resizeMode="contain"
           />

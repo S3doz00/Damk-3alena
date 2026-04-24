@@ -61,12 +61,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-primary/10 rounded-full mx-auto mb-5 flex items-center justify-center">
-            <span className="material-symbols-outlined text-primary text-4xl"
-              style={{ fontVariationSettings: "'FILL' 1" }}>
-              local_hospital
-            </span>
-          </div>
+          <img src="/logo.png" alt="Damk 3alena" className="w-24 h-24 mx-auto mb-5 object-contain" />
           <h1 className="font-headline font-extrabold text-3xl text-on-surface tracking-tight mb-2">
             {t('hospitalDashboard')}
           </h1>
