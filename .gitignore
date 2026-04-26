@@ -59,3 +59,16 @@ supabase/.temp/
 # Backups
 *.bak
 *.old
+
+# Playwright / browser test artifacts
+.playwright-mcp/
+playwright-report/
+test-results/
+
+# Word lock files
+~$*.docx
+~$*.doc
+
+# Report build tooling — large binary, downloaded by scripts
+scripts/plantuml.jar
+scripts/_*.puml

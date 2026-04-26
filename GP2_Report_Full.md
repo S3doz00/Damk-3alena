@@ -25,7 +25,7 @@ Copyright (c) 2025-2026 Applied Science Private University. All rights are reser
 
 ## Abstract
 
-This report presents the development and implementation of "Damk 3alena," an AI-Driven Blood Donation Prediction and Matching System designed for Jordan. The system addresses critical challenges in blood donation management across the country, including fragmented coordination between donors and hospitals, reliance on manual inventory tracking, and the absence of predictive tools for anticipating blood shortages. Damk 3alena integrates three AI modules -- a blood demand forecasting model using XGBoost quantile regression, a shortage detection engine, and a smart donor recommendation system -- into a unified platform comprising a cross-platform donor mobile application and a hospital/blood bank web dashboard. The donor mobile app, built with React Native (Expo), allows donors to register, track eligibility, receive personalized urgent notifications, view nearby blood banks on an interactive map, and book donation appointments. The hospital dashboard, built with React and TypeScript, enables staff to submit blood requests, manage appointments, monitor real-time blood type inventory, and visualize AI-generated forecasts and shortage alerts. The backend leverages Supabase (PostgreSQL) for data storage, authentication, and row-level security, while the AI service runs as an independent FastAPI microservice. The system was developed over a 14-week period using the Scrum framework with 2-week sprints, and demonstrates a functional proof-of-concept that connects all components end-to-end. Evaluation through black-box testing and user feedback confirms that the system meets its core objectives and offers a viable foundation for improving blood supply management in Jordan.
+This report presents the development and implementation of "Damk 3alena," an AI-Driven Blood Donation Prediction and Matching System designed for Jordan. The system addresses critical challenges in blood donation management across the country, including fragmented coordination between donors and hospitals, reliance on manual inventory tracking, and the absence of predictive tools for anticipating blood shortages. Damk 3alena integrates three AI modules -- a blood demand forecasting model using XGBoost quantile regression, a shortage detection engine, and a smart donor recommendation system -- into a unified platform comprising a cross-platform donor mobile application and a hospital/blood bank web dashboard. The donor mobile app, built with React Native (Expo), allows donors to register, track eligibility, receive personalized urgent notifications, view nearby blood banks on an interactive map, and book donation appointments. The hospital dashboard, built with React and TypeScript, enables staff to submit blood requests, manage appointments, monitor real-time blood type inventory, and visualize AI-generated forecasts and shortage alerts. The backend uses Supabase (PostgreSQL) for data storage, authentication, and row-level security, while the AI service runs as an independent FastAPI microservice. The system was developed over a 14-week period using the Scrum framework with 2-week sprints, and works end-to-end as an integrated prototype. Black-box testing and informal user feedback confirm that the system meets its core objectives, and the results suggest the approach is a workable starting point for improving blood supply management in Jordan.
 
 ---
 
@@ -58,9 +58,9 @@ This report presents the development and implementation of "Damk 3alena," an AI-
 
 ## Chapter 1: Introduction
 
-An essential component of every healthcare system is access to safe and sufficient blood supplies. Healthcare facilities in Jordan experience recurring challenges with blood supply management, including difficulty maintaining adequate reserves for uncommon blood types and responding to unexpected medical emergencies. The current blood donation coordination relies heavily on phone calls, social media requests, and independent hospital operations without real-time tracking capabilities. This situation frequently leads to shortages that create dangerous situations for patients in need.
+Healthcare systems depend on a steady supply of safe blood. In Jordan, hospitals run into recurring problems keeping that supply steady — particularly for uncommon blood types and during sudden emergencies. Coordination between hospitals, blood banks, and donors mostly happens over phone calls, social media posts, and each hospital's own internal operations, with no shared real-time view of inventory. The result is shortages that put patients at risk, often discovered only after they have already started.
 
-This project addresses these challenges by developing an AI-powered blood donation management system that integrates predictive analytics with a mobile application and web dashboard. By connecting donors, hospitals, and blood banks through a single intelligent platform, the system transforms blood donation management from a reactive process into a proactive, data-driven operation.
+This project tackles these problems by building an AI-powered blood donation management system that combines predictive analytics with a mobile application for donors and a web dashboard for hospital staff. The aim is to move blood donation management away from a reactive, ad-hoc process and toward something closer to data-driven operations, where shortages are anticipated rather than discovered.
 
 ### 1.1 Description of the Current Situation and Opportunity
 
@@ -93,7 +93,7 @@ The main problems and limitations that this project addresses are:
 
 - **Manual and Fragmented Coordination:** Communication between donors, hospitals, and blood banks is largely manual. There is no unified digital platform specifically designed for Jordan that centralizes requests, inventory visibility, and donor engagement.
 
-- **Limited Use of Data and AI:** Historical data on donations and consumption is rarely leveraged. Few systems in Jordan apply machine learning to forecast demand, estimate donor availability, or optimize campaign planning.
+- **Limited Use of Data and AI:** Historical data on donations and consumption is rarely used. Few systems in Jordan apply machine learning to forecast demand, estimate donor availability, or plan campaigns.
 
 - **Unstructured Donor Engagement:** Donors are not always notified at the right time or in the right way. There is no intelligent recommender that matches donors with hospitals based on urgency, blood type, and eligibility status.
 
@@ -111,7 +111,7 @@ To address the problems identified above, this project implements an AI-Powered 
 
 **Central Digital Platform:** A single platform connects donors with hospitals and blood banks. The donor mobile application (React Native/Expo) handles registration, eligibility tracking, appointment booking, map-based blood bank discovery, and push notifications. The hospital web dashboard (React/TypeScript) provides request management, appointment tracking, inventory monitoring, and AI output visualization.
 
-**Secure Backend Infrastructure:** Supabase (PostgreSQL) serves as the backend with built-in authentication, row-level security (RLS) policies, and real-time capabilities. The AI service operates as an independent FastAPI microservice, communicating with the dashboard via REST API endpoints.
+**Secure Backend Infrastructure:** Supabase (PostgreSQL) is the backend, with built-in authentication, row-level security (RLS) policies, and real-time capabilities. The AI service is an independent FastAPI microservice and talks to the dashboard over REST.
 
 ### 1.5 Project Objectives
 
@@ -307,7 +307,7 @@ This scope excludes clinical/laboratory activities (blood testing and transfusio
 - Row-level security (RLS) policies shall ensure role-based data isolation: donors access only their own records, staff access only their facility's data, and administrators have full system access.
 
 **Reliability**
-- The system shall remain available during normal operation with minimal downtime, leveraging Supabase's managed infrastructure with automatic backups.
+- The system shall remain available during normal operation with minimal downtime, using Supabase's managed infrastructure with automatic backups.
 - Core data (donor profiles, appointments, donation history, requests) shall be persisted in PostgreSQL with referential integrity constraints and cascading deletes where appropriate.
 
 **Performance**
@@ -1525,7 +1525,7 @@ All 27 test cases passed successfully. The system correctly implements all funct
 
 ### 6.1 Summary of Achieved Objectives
 
-This project successfully delivered Damk 3alena, an AI-driven blood donation prediction and matching system for Jordan, as a functional end-to-end prototype. All six objectives defined in Section 1.5 were achieved:
+This project delivered Damk 3alena, an AI-driven blood donation prediction and matching system for Jordan, as a working end-to-end prototype. All six objectives from Section 1.5 were achieved:
 
 1. **Donor Mobile Application:** The cross-platform React Native/Expo application was fully implemented, supporting donor registration with email OTP verification, GPS-based map with Google Maps integration, appointment booking with QR-code tickets, eligibility tracking with a 90-day cooldown, urgent blood request notifications, bilingual English/Arabic interface with RTL support, and account management features including email change and password reset.
 
@@ -1553,7 +1553,7 @@ The Damk 3alena system makes the following contributions to the domain of digita
 
 ### 6.3 Limitations
 
-Despite the system meeting all its defined objectives, several limitations should be acknowledged:
+Although the system met all its objectives, the current prototype has several real limitations:
 
 **Synthetic Training Data:** The XGBoost forecasting model was trained entirely on synthetic data generated to approximate Jordanian donation patterns. While the synthetic data incorporates realistic features (seasonality, Ramadan, facility size and type), it cannot capture the true distribution of blood consumption patterns at Jordanian hospitals. Real forecasting accuracy would require at least 12 months of historical donation and consumption data from actual facilities.
 
@@ -1567,7 +1567,7 @@ Despite the system meeting all its defined objectives, several limitations shoul
 
 ### 6.4 Future Work
 
-Building on the current prototype, the following enhancements are recommended for future development:
+The following are the natural next steps if the prototype were to be carried forward:
 
 **Real Data Collection and Model Retraining:** Partner with Jordanian hospitals and blood banks to collect anonymized historical blood consumption and donation data. Retrain the XGBoost models on real data and implement a scheduled retraining pipeline that updates the model as new data accumulates, improving forecast accuracy over time.
 
